@@ -44,7 +44,7 @@ const Login = () => {
 
     if (validate()) {
       console.log("Login Data:", form);
-      // 👉 API call here
+      // API call here
     }
   };
 
