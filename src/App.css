@@ -1,0 +1,22 @@
+/* Scrollbar width */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #09090b; /* zinc-950 */
+}
+
+/* Thumb */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #3f3f46, #18181b); /* zinc */
+  border-radius: 10px;
+  border: 2px solid #09090b;
+}
+
+/* Hover */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #ffffff, #a1a1aa);
+}
