@@ -1,7 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
+import ProfileReducer from "../features/profileSlice";
+import UpdatePasswordReducer from "../features/updatePasswordSlice";
 
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    profile: ProfileReducer,
+    password: UpdatePasswordReducer,
+  },
 });
 
 export type RootState = ReturnType<typeof store.getState>;

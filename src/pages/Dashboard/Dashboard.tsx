@@ -45,9 +45,9 @@ const activities = [
 ];
 
 const Dashboard = () => {
+
   return (
     <div className="text-white space-y-6">
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {stats.map((item, i) => {

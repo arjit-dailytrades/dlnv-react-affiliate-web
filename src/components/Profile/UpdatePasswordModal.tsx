@@ -1,5 +1,15 @@
-import { Landmark, X } from "lucide-react";
-import { useState } from "react";
+import {
+  UserRoundKey,
+  X,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { updatePassword } from "../../features/updatePasswordSlice";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../app/store";
 
 type Props = {
   open: boolean;
@@ -7,144 +17,193 @@ type Props = {
 };
 
 const UpdatePasswordModal = ({ open, onClose }: Props) => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { updatePasswordLoading } = useSelector(
+    (state: RootState) => state.password,
+  );
+
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const validatePassword = () => {
-    const err: any = {};
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    if (!passwordData.oldPassword) {
-      err.oldPassword = "Old password required";
+  // 1. Live Validation Logic
+  useEffect(() => {
+    const err: Record<string, string> = {};
+
+    if (touched.oldPassword && !passwordData.oldPassword)
+      err.oldPassword = "Old password is required";
+
+    if (touched.newPassword) {
+      if (!passwordData.newPassword)
+        err.newPassword = "New password is required";
+      else if (passwordData.newPassword.length < 8)
+        err.newPassword = "Minimum 8 characters required";
     }
 
-    if (!passwordData.newPassword) {
-      err.newPassword = "New password required";
-    } else if (passwordData.newPassword.length < 6) {
-      err.newPassword = "Minimum 6 characters";
-    }
-
-    if (!passwordData.confirmPassword) {
-      err.confirmPassword = "Confirm password required";
-    } else if (passwordData.newPassword !== passwordData.confirmPassword) {
-      err.confirmPassword = "Passwords do not match";
+    if (touched.confirmPassword) {
+      if (!passwordData.confirmPassword)
+        err.confirmPassword = "Please confirm your password";
+      else if (passwordData.newPassword !== passwordData.confirmPassword)
+        err.confirmPassword = "Passwords do not match";
     }
 
     setErrors(err);
-    return Object.keys(err).length === 0;
+  }, [passwordData, touched]);
+
+  // 2. Button Disable Logic (useMemo for performance)
+  const isFormInvalid = useMemo(() => {
+    return (
+      !passwordData.oldPassword ||
+      passwordData.newPassword.length < 8 ||
+      passwordData.newPassword !== passwordData.confirmPassword ||
+      Object.keys(errors).length > 0
+    );
+  }, [passwordData, errors]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handlePasswordUpdate = () => {
-    if (validatePassword()) {
-      console.log("Update Password", passwordData);
-
-      // reset + close
-      setPasswordData({
-        oldPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-      onClose();
-    }
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
-  // ❗ Important: don't render if not open
+  const handleResetAndClose = () => {
+    setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
+    setErrors({});
+    setTouched({});
+    setShowOldPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    onClose();
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Form submit default behavior roko
+    if (isFormInvalid || updatePasswordLoading) return;
+
+    const payload = {
+      oldPassword: passwordData.oldPassword,
+      newPassword: passwordData.newPassword,
+    };
+    dispatch(updatePassword(payload));
+  };
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900/40 border border-white/5 backdrop-blur-xl shadow-2xl rounded-2xl w-full max-w-[600px] text-white overflow-hidden">
+      <div className="bg-zinc-900/40 border border-white/5 backdrop-blur-xl shadow-2xl rounded-2xl w-full max-w-[500px] text-white overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
+        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/[0.02]">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white rounded-lg">
-              <Landmark size={18} className="text-black" />
+              <UserRoundKey size={18} className="text-black" />
             </div>
             <h3 className="text-xl font-semibold tracking-tight">
-              Update Bank Details
+              Update Password
             </h3>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleResetAndClose}
             className="text-zinc-500 hover:text-white transition-colors"
           >
             <X size={24} />
           </button>
         </div>
 
-        <div className="p-8 space-y-5">
-          {/* Old Password */}
-          <input
-            type="password"
-            placeholder="Old Password"
-            value={passwordData.oldPassword}
-            className="w-full px-4 py-2 rounded-lg bg-black border border-gray-800"
-            onChange={(e) =>
-              setPasswordData({
-                ...passwordData,
-                oldPassword: e.target.value,
-              })
-            }
-          />
-          {errors.oldPassword && (
-            <p className="text-red-400 text-xs">{errors.oldPassword}</p>
-          )}
+        <form onSubmit={handleSubmit} className="p-8 space-y-2">
+          {/* Input Fields Container */}
+          {[
+            {
+              id: "oldPassword",
+              label: "Old Password",
+              value: passwordData.oldPassword,
+              show: showOldPassword,
+              setShow: setShowOldPassword,
+            },
+            {
+              id: "newPassword",
+              label: "New Password",
+              value: passwordData.newPassword,
+              show: showNewPassword,
+              setShow: setShowNewPassword,
+            },
+            {
+              id: "confirmPassword",
+              label: "Confirm New Password",
+              value: passwordData.confirmPassword,
+              show: showConfirmPassword,
+              setShow: setShowConfirmPassword,
+            },
+          ].map((field) => (
+            <div key={field.id}>
+              <div className="relative group">
+                <input
+                  type={field.show ? "text" : "password"}
+                  placeholder={field.label}
+                  value={field.value}
+                  onBlur={() => handleBlur(field.id)}
+                  onChange={(e) => handleInputChange(field.id, e.target.value)}
+                  className={`w-full px-4 py-3 pr-12 rounded-xl bg-black border transition-all outline-none ${
+                    errors[field.id]
+                      ? "border-red-500/50 focus:border-red-500"
+                      : "border-zinc-800 focus:border-zinc-500"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => field.setShow(!field.show)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  {field.show ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              <div className="h-6 mt-1 ml-1">
+                {errors[field.id] && (
+                  <p className="text-red-400 text-[11px] font-medium flex items-center gap-1 animate-in slide-in-from-top-1">
+                    <AlertCircle size={12} /> {errors[field.id]}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
 
-          {/* New Password */}
-          <input
-            type="password"
-            placeholder="New Password"
-            value={passwordData.newPassword}
-            className="w-full px-4 py-2 rounded-lg bg-black border border-gray-800"
-            onChange={(e) =>
-              setPasswordData({
-                ...passwordData,
-                newPassword: e.target.value,
-              })
-            }
-          />
-          {errors.newPassword && (
-            <p className="text-red-400 text-xs">{errors.newPassword}</p>
-          )}
-
-          {/* Confirm Password */}
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={passwordData.confirmPassword}
-            className="w-full px-4 py-2 rounded-lg bg-black border border-gray-800"
-            onChange={(e) =>
-              setPasswordData({
-                ...passwordData,
-                confirmPassword: e.target.value,
-              })
-            }
-          />
-          {errors.confirmPassword && (
-            <p className="text-red-400 text-xs">{errors.confirmPassword}</p>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="p-6 bg-white/5 border-t border-white/5 flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 font-semibold hover:bg-zinc-800 transition-all"
-          >
-            Cancel
-          </button>
-
-          <button
-            onClick={handlePasswordUpdate}
-            className="flex-1 px-4 py-2 rounded-xl bg-white text-black font-bold hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all"
-          >
-            Update
-          </button>
-        </div>
+          {/* Actions */}
+          <div className="pt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={handleResetAndClose}
+              className="flex-1 px-4 py-3 rounded-xl border border-zinc-800 text-zinc-400 font-semibold hover:bg-zinc-800 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isFormInvalid || updatePasswordLoading}
+              className="flex-1 px-4 py-3 rounded-xl bg-white text-black font-bold hover:bg-zinc-200 transition-all active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2"
+            >
+              {updatePasswordLoading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Update Password"
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

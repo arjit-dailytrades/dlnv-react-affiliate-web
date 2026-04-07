@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   User,
@@ -9,6 +9,7 @@ import {
   Milestone,
 } from "lucide-react";
 import Logo from "../../assets/appLogo.png";
+import { logout } from "../../utils/auth";
 
 const menuItems = [
   { name: "Dashboard", path: "dashboard", icon: LayoutDashboard },
@@ -25,6 +26,10 @@ const Sidebar = ({
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    logout(navigate);
+  };
   return (
     <>
       {/* Overlay */}
@@ -92,7 +97,10 @@ const Sidebar = ({
         <div className="absolute bottom-8 w-full px-4">
           <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-gray-800 to-transparent mb-6" />
 
-          <button className="flex items-center gap-4 w-full px-4 py-3.5 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-all duration-300 border border-transparent hover:border-red-500/20">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-4 w-full px-4 py-3.5 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-all duration-300 border border-transparent hover:border-red-500/20"
+          >
             <LogOut size={22} />
             <span className="font-medium uppercase text-sm tracking-widest">
               Sign Out
