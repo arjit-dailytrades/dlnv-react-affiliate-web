@@ -123,6 +123,7 @@ import Milestones from "./pages/MileStone/MileStone";
 import VerifyEmail from "./pages/Auth/VerifyEmail";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
+import NotFound from "./pages/NotFound/NotFound";
 
 // --- AUTH LOGIC HELPERS ---
 
@@ -223,16 +224,9 @@ function App() {
         },
       ],
     },
-
-    // 404 handler (Optional)
     {
       path: "*",
-      element: (
-        <Navigate
-          to={localStorage.getItem("token") ? route.DASHBOARD : route.LOGIN}
-          replace
-        />
-      ),
+      element: <NotFound />,
     },
   ]);
 

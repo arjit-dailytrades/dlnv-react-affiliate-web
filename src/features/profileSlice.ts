@@ -1,7 +1,8 @@
-// src/features/profile/profileThunk.ts
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { createSlice } from "@reduxjs/toolkit";
+// src/features/profile/profileSlice.ts
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiClient } from "../api/apiClient";
+
+/* ===================== THUNKS ===================== */
 
 export const getProfile = createAsyncThunk(
   "profile/getProfile",
@@ -9,7 +10,27 @@ export const getProfile = createAsyncThunk(
     try {
       const data = await apiClient({
         method: "get",
-        url: "/profile",
+        url: "/affiliate/profile",
+      });
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
+
+export const UpdateProfile = createAsyncThunk(
+  "profile/updateProfile",
+  async (dp: File, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("dp", dp);
+
+      const data = await apiClient({
+        method: "patch",
+        url: "/affiliate/profile-update-dp",
+        data: formData,
+        isFormData: true,
       });
 
       return data;
@@ -19,27 +40,45 @@ export const getProfile = createAsyncThunk(
   },
 );
 
+/* ===================== STATE ===================== */
+
 interface ProfileState {
   loading: boolean;
   data: any;
   error: string | null;
+
+  upLoadingProfile: boolean;
+  updateSuccess: boolean;
+  updateError: string | null;
 }
 
 const initialState: ProfileState = {
   loading: false,
   data: null,
   error: null,
+
+  upLoadingProfile: false,
+  updateSuccess: false,
+  updateError: null,
 };
+
+/* ===================== SLICE ===================== */
 
 const profileSlice = createSlice({
   name: "profile",
   initialState,
-  reducers: {},
+  reducers: {
+    resetProfileState: (state) => {
+      state.updateSuccess = false;
+      state.updateError = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
-      // GET
+      /* ===== GET PROFILE ===== */
       .addCase(getProfile.pending, (state) => {
         state.loading = true;
+        state.error = null; // ✅ reset
       })
       .addCase(getProfile.fulfilled, (state, action) => {
         state.loading = false;
@@ -48,8 +87,31 @@ const profileSlice = createSlice({
       .addCase(getProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+
+      /* ===== UPDATE DP ===== */
+      .addCase(UpdateProfile.pending, (state) => {
+        state.upLoadingProfile = true;
+        state.updateSuccess = false;
+        state.updateError = null; // ✅ reset
+      })
+      .addCase(UpdateProfile.fulfilled, (state, action) => {
+        state.upLoadingProfile = false;
+        state.updateSuccess = true;
+
+        if (state.data) {
+          state.data = {
+            ...state.data,
+            dp: action.payload?.dp || action.payload?.data?.dp,
+          };
+        }
+      })
+      .addCase(UpdateProfile.rejected, (state, action) => {
+        state.upLoadingProfile = false;
+        state.updateError = action.payload as string;
       });
   },
 });
 
+export const { resetProfileState } = profileSlice.actions;
 export default profileSlice.reducer;

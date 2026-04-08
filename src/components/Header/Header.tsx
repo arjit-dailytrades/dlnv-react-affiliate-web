@@ -1,11 +1,16 @@
 import { Menu, ChevronDown } from "lucide-react";
+import { useSelector } from "react-redux";
 import { useLocation, Link, useNavigate } from "react-router-dom";
+import type { RootState } from "../../app/store";
 
 type HeaderProps = {
   onMenuClick: () => void;
 };
 
 const Header = ({ onMenuClick }: HeaderProps) => {
+  const { data: user, loading } = useSelector(
+    (state: RootState) => state.profile,
+  );
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -13,6 +18,19 @@ const Header = ({ onMenuClick }: HeaderProps) => {
 
   const formatName = (name: string) => {
     return name.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+  console.log(user);
+
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+
+    const words = name.trim().split(" ");
+
+    if (words.length === 1) {
+      return words[0].charAt(0).toUpperCase();
+    }
+
+    return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
   };
 
   return (
@@ -51,48 +69,25 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             onClick={() => navigate("profile")}
             className="flex items-center gap-3 rounded-full hover:bg-gray-800 transition border border-transparent hover:border-gray-700"
           >
-            {/* <div className="flex flex-col items-end hidden md:flex">
-              <span className="text-xs font-semibold text-white">Arjit</span>
-              <span className="text-[10px] text-gray-500 uppercase tracking-wider">
-                Admin
-              </span>
-            </div> */}
-
             <div className="relative">
-              <img
-                src="https://i.pravatar.cc/40"
-                alt="user"
-                className="w-9 h-9 rounded-full border border-gray-700"
-              />
+              {user?.dp ? (
+                <img
+                  src={user.dp}
+                  alt="user"
+                  className="w-9 h-9 rounded-full border border-gray-700 object-cover"
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full border border-gray-700 bg-zinc-800 flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">
+                    {getInitials(user?.name || "")}
+                  </span>
+                </div>
+              )}
+
               <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-black rounded-full" />
             </div>
-
-            {/* <ChevronDown size={14} className="text-gray-500 hidden md:block" /> */}
           </button>
         </div>
-
-        {/* Breadcrumbs */}
-        {/* <div className="flex items-center gap-2 text-xs text-gray-400">
-          <Link to="/" className="hover:text-white transition">
-            Home
-          </Link>
-
-          {pathnames.map((value, index) => {
-            const to = "/" + pathnames.slice(0, index + 1).join("/");
-
-            return (
-              <div key={to} className="flex items-center gap-2">
-                <span>/</span>
-                <Link
-                  to={to}
-                  className="hover:text-white capitalize transition"
-                >
-                  {formatName(value)}
-                </Link>
-              </div>
-            );
-          })}
-        </div> */}
       </div>
     </header>
   );
