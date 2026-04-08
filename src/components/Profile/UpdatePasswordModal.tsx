@@ -7,9 +7,11 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { updatePassword } from "../../features/updatePasswordSlice";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../../app/store";
+
+import { showError, showSuccess } from "../common/ToastService";
+import axios from "axios";
+import { environment } from "../../environments/environment";
+import { apiClient } from "../../api/apiClient";
 
 type Props = {
   open: boolean;
@@ -17,18 +19,12 @@ type Props = {
 };
 
 const UpdatePasswordModal = ({ open, onClose }: Props) => {
-  const dispatch = useDispatch<AppDispatch>();
-
-  const { updatePasswordLoading } = useSelector(
-    (state: RootState) => state.password,
-  );
-
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -88,15 +84,38 @@ const UpdatePasswordModal = ({ open, onClose }: Props) => {
     onClose();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Form submit default behavior roko
-    if (isFormInvalid || updatePasswordLoading) return;
+  const updatePassword = async () => {
+    setLoading(true);
+    try {
+      const response = await apiClient({
+        method: "post",
+        url: "/affiliate/update-password",
+        data: {
+          oldPassword: passwordData.oldPassword,
+          password: passwordData.newPassword,
+        },
+      });
 
-    const payload = {
-      oldPassword: passwordData.oldPassword,
-      newPassword: passwordData.newPassword,
-    };
-    dispatch(updatePassword(payload));
+      showSuccess(response?.data?.message || "Password updated successfully");
+
+      handleResetAndClose();
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+
+      showError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isFormInvalid) return;
+
+    updatePassword();
   };
 
   if (!open) return null;
@@ -122,7 +141,10 @@ const UpdatePasswordModal = ({ open, onClose }: Props) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-2">
+        <form
+          onSubmit={handleSubmit}
+          className="p-8 space-y-2 max-h-[70vh] overflow-y-auto"
+        >
           {/* Input Fields Container */}
           {[
             {
@@ -190,10 +212,10 @@ const UpdatePasswordModal = ({ open, onClose }: Props) => {
             </button>
             <button
               type="submit"
-              disabled={isFormInvalid || updatePasswordLoading}
+              disabled={isFormInvalid || loading}
               className="flex-1 px-4 py-3 rounded-xl bg-white text-black font-bold hover:bg-zinc-200 transition-all active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2"
             >
-              {updatePasswordLoading ? (
+              {loading ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
                   Updating...

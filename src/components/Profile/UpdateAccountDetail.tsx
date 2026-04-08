@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { X, Landmark } from "lucide-react";
+import { X, Landmark, Eye, EyeOff } from "lucide-react";
+import { apiClient } from "../../api/apiClient";
+import { showError, showSuccess } from "../common/ToastService";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../app/store";
+import { getProfile } from "../../features/profileSlice";
 
 type Props = {
   open: boolean;
@@ -7,52 +12,120 @@ type Props = {
 };
 
 const UpdateAccountDetailModal = ({ open, onClose }: Props) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [accountDetail, setAccountDetail] = useState({
     accountHolderName: "",
     accountNumber: "",
     confirmAccountNumber: "",
     ifscCode: "",
     branchName: "",
+    upiId: "",
   });
 
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<any>({});
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
 
-  const validateDetails = () => {
-    const err: any = {};
+  const validateField = (name: string, value: string) => {
+    let message = "";
 
-    if (!accountDetail.accountHolderName.trim()) {
-      err.accountHolderName = "Account holder name is required";
+    switch (name) {
+      case "accountHolderName":
+        if (!value.trim()) message = "Account holder name is required";
+        break;
+
+      case "accountNumber":
+        if (!value) message = "Account number is required";
+        break;
+
+      case "confirmAccountNumber":
+        if (!value) {
+          message = "Please confirm your account number";
+        } else if (value !== accountDetail.accountNumber) {
+          message = "Account numbers do not match";
+        }
+        break;
+
+      case "ifscCode":
+        if (!value) {
+          message = "IFSC code is required";
+        } else if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(value.toUpperCase())) {
+          message = "Invalid IFSC format (e.g. HDFC0001234)";
+        }
+        break;
+
+      case "branchName":
+        if (!value.trim()) message = "Branch name is required";
+        break;
+
+      case "upiId":
+        if (value && !/^[\w.-]+@[\w.-]+$/.test(value)) {
+          message = "Invalid UPI ID (e.g. name@bank)";
+        }
+        break;
     }
 
-    if (!accountDetail.accountNumber) {
-      err.accountNumber = "Account number is required";
-    }
+    setErrors((prev: any) => ({
+      ...prev,
+      [name]: message,
+    }));
+  };
 
-    if (!accountDetail.confirmAccountNumber) {
-      err.confirmAccountNumber = "Please confirm your account number";
-    } else if (accountDetail.accountNumber !== accountDetail.confirmAccountNumber) {
-      err.confirmAccountNumber = "Account numbers do not match";
-    }
+  const isFormValid =
+    accountDetail.accountHolderName &&
+    accountDetail.accountNumber &&
+    accountDetail.confirmAccountNumber &&
+    accountDetail.ifscCode &&
+    accountDetail.branchName &&
+    Object.values(errors).every((err) => !err);
 
-    if (!accountDetail.ifscCode) {
-      err.ifscCode = "IFSC code is required";
-    } else if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(accountDetail.ifscCode.toUpperCase())) {
-      err.ifscCode = "Invalid IFSC format (e.g. HDFC0001234)";
-    }
+  const handleResetAndClose = () => {
+    setAccountDetail({
+      accountHolderName: "",
+      accountNumber: "",
+      confirmAccountNumber: "",
+      ifscCode: "",
+      branchName: "",
+      upiId: "",
+    });
+    setErrors({});
+    onClose();
+  };
 
-    if (!accountDetail.branchName.trim()) {
-      err.branchName = "Branch name is required";
-    }
+  const updateBankDetail = async () => {
+    setIsLoading(true);
+    try {
+      const payload = {
+        accountNumber: accountDetail.accountNumber,
+        accountHolderName: accountDetail.accountHolderName,
+        ifscCode: accountDetail.ifscCode,
+        bankName: accountDetail.branchName,
+        ...(accountDetail.upiId && { upiId: accountDetail.upiId }),
+      };
 
-    setErrors(err);
-    return Object.keys(err).length === 0;
+      const response = await apiClient({
+        method: "patch",
+        url: "/affiliate/update-bank-details",
+        data: payload,
+      });
+
+      showSuccess(response?.data?.message || "Bank details updated");
+      handleResetAndClose();
+      dispatch(getProfile());
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      showError(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleUpdate = () => {
-    if (validateDetails()) {
-      console.log("Updating Bank Details:", accountDetail);
-      // Add your API call or Redux action here
-      onClose();
+    if (isFormValid) {
+      updateBankDetail();
     }
   };
 
@@ -61,105 +134,197 @@ const UpdateAccountDetailModal = ({ open, onClose }: Props) => {
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-zinc-900/40 border border-white/5 backdrop-blur-xl shadow-2xl rounded-2xl w-full max-w-[600px] text-white overflow-hidden">
-        
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white rounded-lg">
               <Landmark size={18} className="text-black" />
             </div>
-            <h3 className="text-xl font-semibold tracking-tight">Update Bank Details</h3>
+            <h3 className="text-xl font-semibold">Update Bank Details</h3>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
+          <button onClick={handleResetAndClose}>
             <X size={24} />
           </button>
         </div>
 
-        <div className="p-8 space-y-5">
-          {/* Holder Name */}
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Account Holder Name</label>
+        <div className="max-h-[70vh] overflow-y-auto p-8 space-y-3">
+          {/* Name */}
+          <div>
+            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+              Account Holder Name
+            </label>
             <input
               type="text"
-              placeholder="e.g. Arjit Singh"
               value={accountDetail.accountHolderName}
-              className={`w-full px-4 py-3 rounded-xl bg-black border ${errors.accountHolderName ? 'border-red-500/50' : 'border-zinc-800'} focus:border-zinc-500 outline-none transition-all`}
-              onChange={(e) => setAccountDetail({ ...accountDetail, accountHolderName: e.target.value })}
+              className={`w-full px-4 py-3 rounded-xl bg-black border ${
+                errors.accountHolderName
+                  ? "border-red-500/50"
+                  : "border-zinc-800"
+              } focus:border-zinc-500 outline-none`}
+              onChange={(e) => {
+                const value = e.target.value;
+                setAccountDetail((p) => ({ ...p, accountHolderName: value }));
+                validateField("accountHolderName", value);
+              }}
             />
-            {errors.accountHolderName && <p className="text-red-400 text-[10px] mt-1 ml-1">{errors.accountHolderName}</p>}
+            <p className="text-red-400 text-[10px] mt-1 ml-1 min-h-[14px]">
+              {errors.accountHolderName || ""}
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Account Numbers */}
+          <div className="grid md:grid-cols-2 gap-4">
             {/* Account Number */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Account Number</label>
+            <div>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                Account Number
+              </label>
+              <div className="relative">
+                <input
+                  type={showAccountNumber ? "text" : "password"}
+                  value={accountDetail.accountNumber}
+                  className={`w-full px-4 py-3 pr-10 rounded-xl bg-black border ${
+                    errors.accountNumber
+                      ? "border-red-500/50"
+                      : "border-zinc-800"
+                  } focus:border-zinc-500 outline-none`}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    setAccountDetail((p) => ({ ...p, accountNumber: value }));
+                    validateField("accountNumber", value);
+                    validateField(
+                      "confirmAccountNumber",
+                      accountDetail.confirmAccountNumber,
+                    );
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAccountNumber((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
+                >
+                  {showAccountNumber ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              <p className="text-red-400 text-[10px] mt-1 ml-1 min-h-[14px]">
+                {errors.accountNumber || ""}
+              </p>
+            </div>
+
+            {/* Confirm */}
+            <div>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                Confirm Number
+              </label>
               <input
                 type="password"
-                placeholder="••••••••••••"
-                value={accountDetail.accountNumber}
-                className={`w-full px-4 py-3 rounded-xl bg-black border ${errors.accountNumber ? 'border-red-500/50' : 'border-zinc-800'} focus:border-zinc-500 outline-none transition-all`}
-                onChange={(e) => setAccountDetail({ ...accountDetail, accountNumber: e.target.value })}
-              />
-              {errors.accountNumber && <p className="text-red-400 text-[10px] mt-1 ml-1">{errors.accountNumber}</p>}
-            </div>
-
-            {/* Confirm Account Number */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Confirm Number</label>
-              <input
-                type="text"
-                placeholder="Enter again"
                 value={accountDetail.confirmAccountNumber}
-                className={`w-full px-4 py-3 rounded-xl bg-black border ${errors.confirmAccountNumber ? 'border-red-500/50' : 'border-zinc-800'} focus:border-zinc-500 outline-none transition-all`}
-                onChange={(e) => setAccountDetail({ ...accountDetail, confirmAccountNumber: e.target.value })}
+                className={`w-full px-4 py-3 rounded-xl bg-black border ${
+                  errors.confirmAccountNumber
+                    ? "border-red-500/50"
+                    : "border-zinc-800"
+                } focus:border-zinc-500 outline-none`}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "");
+                  setAccountDetail((p) => ({
+                    ...p,
+                    confirmAccountNumber: value,
+                  }));
+                  validateField("confirmAccountNumber", value);
+                }}
               />
-              {errors.confirmAccountNumber && <p className="text-red-400 text-[10px] mt-1 ml-1">{errors.confirmAccountNumber}</p>}
+              <p className="text-red-400 text-[10px] mt-1 ml-1 min-h-[14px]">
+                {errors.confirmAccountNumber || ""}
+              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* IFSC Code */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">IFSC Code</label>
+          {/* UPI */}
+          <div>
+            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+              UPI ID (Optional)
+            </label>
+            <input
+              type="text"
+              value={accountDetail.upiId}
+              className={`w-full px-4 py-3 rounded-xl bg-black border ${
+                errors.upiId ? "border-red-500/50" : "border-zinc-800"
+              } focus:border-zinc-500 outline-none`}
+              onChange={(e) => {
+                const value = e.target.value;
+                setAccountDetail((p) => ({ ...p, upiId: value }));
+                validateField("upiId", value);
+              }}
+            />
+            <p className="text-red-400 text-[10px] mt-1 ml-1 min-h-[14px]">
+              {errors.upiId || ""}
+            </p>
+          </div>
+
+          {/* IFSC + Branch */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                IFSC Code
+              </label>
               <input
-                type="text"
-                placeholder="SBIN0001234"
-                value={accountDetail.ifscCode}
-                className={`w-full px-4 py-3 rounded-xl bg-black border ${errors.ifscCode ? 'border-red-500/50' : 'border-zinc-800'} focus:border-zinc-500 outline-none transition-all uppercase`}
-                onChange={(e) => setAccountDetail({ ...accountDetail, ifscCode: e.target.value })}
+                value={accountDetail.ifscCode.toUpperCase()}
+                maxLength={11}
+                className={`w-full px-4 py-3 rounded-xl bg-black border ${
+                  errors.ifscCode ? "border-red-500/50" : "border-zinc-800"
+                } focus:border-zinc-500 outline-none`}
+                onChange={(e) => {
+                  const value = e.target.value.toUpperCase().slice(0, 11);
+                  setAccountDetail((p) => ({ ...p, ifscCode: value }));
+                  validateField("ifscCode", value);
+                }}
               />
-              {errors.ifscCode && <p className="text-red-400 text-[10px] mt-1 ml-1">{errors.ifscCode}</p>}
+              <p className="text-red-400 text-[10px] mt-1 ml-1 min-h-[14px]">
+                {errors.ifscCode || ""}
+              </p>
             </div>
 
-            {/* Branch Name */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Branch Name</label>
+            <div>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                Branch Name
+              </label>
               <input
-                type="text"
-                placeholder="e.g. Mumbai"
                 value={accountDetail.branchName}
-                className={`w-full px-4 py-3 rounded-xl bg-black border ${errors.branchName ? 'border-red-500/50' : 'border-zinc-800'} focus:border-zinc-500 outline-none transition-all`}
-                onChange={(e) => setAccountDetail({ ...accountDetail, branchName: e.target.value })}
+                className={`w-full px-4 py-3 rounded-xl bg-black border ${
+                  errors.branchName ? "border-red-500/50" : "border-zinc-800"
+                } focus:border-zinc-500 outline-none`}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setAccountDetail((p) => ({ ...p, branchName: value }));
+                  validateField("branchName", value);
+                }}
               />
-              {errors.branchName && <p className="text-red-400 text-[10px] mt-1 ml-1">{errors.branchName}</p>}
+              <p className="text-red-400 text-[10px] mt-1 ml-1 min-h-[14px]">
+                {errors.branchName || ""}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="p-6 bg-white/5 border-t border-white/5 flex gap-3">
+        <div className="p-6 flex gap-3 border-t border-white/5">
           <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 font-semibold hover:bg-zinc-800 transition-all"
+            onClick={handleResetAndClose}
+            className="flex-1 px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:bg-zinc-800"
           >
             Cancel
           </button>
 
           <button
             onClick={handleUpdate}
-            className="flex-1 px-4 py-2 rounded-xl bg-white text-black font-bold hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all"
+            disabled={!isFormValid || isLoading}
+            className={`flex-1 px-4 py-2 rounded-xl font-bold transition-all ${
+              !isFormValid || isLoading
+                ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+                : "bg-white text-black hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+            }`}
           >
-            Save Changes
+            {isLoading ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>

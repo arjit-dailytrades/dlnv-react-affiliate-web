@@ -14,6 +14,7 @@ import {
   Check,
   Copy,
   LoaderIcon,
+  Landmark,
 } from "lucide-react";
 import UpdatePasswordModal from "../../components/Profile/UpdatePasswordModal";
 import UpdateAccountDetailModal from "../../components/Profile/UpdateAccountDetail";
@@ -25,18 +26,6 @@ import {
   UpdateProfile,
 } from "../../features/profileSlice";
 import type { AppDispatch, RootState } from "../../app/store";
-
-type User = {
-  name: string;
-  email: string;
-  mobile: string;
-  referralCode: string;
-  isEmailVerified: boolean;
-  commissionPer: number;
-  userCommissionPer: number;
-  createdAt: string;
-  updatedAt: string;
-};
 
 const Profile = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -123,6 +112,8 @@ const Profile = () => {
 
     return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
   };
+  console.log(user.bankDetails, "=======bankDetails");
+
   return (
     <div className="text-white">
       {/* User Detail */}
@@ -262,82 +253,131 @@ const Profile = () => {
       </div>
 
       {/* Bank Details */}
+
       <div className="mx-auto mt-4">
-        {/* Main Container */}
-        <div className="border border-white/5 rounded-[2rem] p-3 md:p-6 backdrop-blur-xl shadow-2xl">
-          {/* Header Section */}
-          <div className="mb-8 space-y-1">
-            <h1 className="text-3xl md:text-4xl font-light tracking-tight text-white">
-              Bank Account
-            </h1>
-            <p className="text-zinc-500 text-sm font-medium tracking-wide">
-              Manage your settlement destination
-            </p>
-          </div>
-
-          {/* Fields Grid: 1 col on mobile, 2 cols on desktop */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            {/* Field 1: Account Holder Name */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
-                Holder Name
-              </label>
-              <div className="bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 flex items-center gap-3 focus-within:border-zinc-600 transition-colors">
-                <CreditCard size={16} className="text-zinc-600" />
-                <span className="font-medium truncate">
-                  {bankInfo.holderName}
-                </span>
+        <div className="border border-white/5 rounded-[2rem] p-4 md:p-6 backdrop-blur-xl shadow-2xl">
+          {!user?.bankDetails ? (
+            <div className="flex flex-col items-center justify-center text-center py-12 px-4">
+              {/* Icon */}
+              <div className="w-14 h-14 flex items-center justify-center rounded-full bg-white/5 mb-4">
+                <Landmark className="text-zinc-400" size={24} />
               </div>
-            </div>
 
-            {/* Field 2: Account Number */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
-                Account No.
-              </label>
-              <div className="bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 flex items-center gap-3 focus-within:border-zinc-600 transition-colors">
-                <Hash size={16} className="text-zinc-600" />
-                <span className="font-mono tracking-wider truncate">
-                  {bankInfo.accountNumber}
-                </span>
+              {/* Heading */}
+              <h2 className="text-xl md:text-2xl font-semibold text-white">
+                No Bank Account Added
+              </h2>
+
+              {/* Description */}
+              <p className="text-zinc-500 text-sm mt-2 max-w-md">
+                Add your bank account details to enable smooth withdrawals and
+                settlements. This will be your primary destination for payouts.
+              </p>
+
+              {/* Button */}
+              <button
+                onClick={() => setShowAccountDetailModal(true)}
+                className="mt-6 group flex items-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-white to-zinc-300 text-black font-bold hover:scale-[1.03] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+              >
+                <Pencil size={18} />
+                Add Account Details
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="mb-8 space-y-1">
+                {/* Header Section */}
+                <div className="mb-8 space-y-1">
+                  <h1 className="text-3xl md:text-4xl font-light tracking-tight text-white">
+                    Bank Account
+                  </h1>
+                  <p className="text-zinc-500 text-sm font-medium tracking-wide">
+                    Manage your settlement destination
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                  {/* Field 1: Account Holder Name */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                      Holder Name
+                    </label>
+                    <div className="bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 flex items-center gap-3 focus-within:border-zinc-600 transition-colors">
+                      <CreditCard size={16} className="text-zinc-600" />
+                      <span className="font-medium truncate">
+                        {user?.bankDetails?.accountHolderName}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Field 2: Account Number */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                      Account No.
+                    </label>
+                    <div className="bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 flex items-center gap-3 focus-within:border-zinc-600 transition-colors">
+                      <Hash size={16} className="text-zinc-600" />
+                      <span className="font-mono tracking-wider truncate">
+                        {user?.bankDetails?.accountNumber}
+                      </span>
+                    </div>
+                  </div>
+                  {/* UPI id */}
+                  {user?.bankDetails?.upi && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                        UPI Id
+                      </label>
+                      <div className="bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 flex items-center gap-3 focus-within:border-zinc-600 transition-colors">
+                        <Hash size={16} className="text-zinc-600" />
+                        <span className="font-mono tracking-wider truncate">
+                          {user?.bankDetails?.upi}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Field 3: IFSC Code */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                      IFSC Code
+                    </label>
+                    <div className="bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 flex items-center gap-3 focus-within:border-zinc-600 transition-colors">
+                      <Code size={16} className="text-zinc-600" />
+                      <span className="font-mono uppercase truncate">
+                        {user?.bankDetails?.ifscCode}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Field 4: Branch */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                      Branch
+                    </label>
+                    <div className="bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 flex items-center gap-3 focus-within:border-zinc-600 transition-colors">
+                      <MapPin size={16} className="text-zinc-600" />
+                      <span className="font-medium truncate">
+                        {user?.bankDetails?.bankName}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    disabled={user?.bankDetails}
+                    style={{ opacity: user?.bankDetails ? ".5" : "1" }}
+                    onClick={() => setShowAccountDetailModal(true)}
+                    className="w-full md:w-auto group flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-white to-zinc-300 text-black font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                  >
+                    <Pencil size={18} />
+                    Update Account Details
+                  </button>
+                </div>
               </div>
-            </div>
-
-            {/* Field 3: IFSC Code */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
-                IFSC Code
-              </label>
-              <div className="bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 flex items-center gap-3 focus-within:border-zinc-600 transition-colors">
-                <Code size={16} className="text-zinc-600" />
-                <span className="font-mono uppercase truncate">
-                  {bankInfo.ifscCode}
-                </span>
-              </div>
-            </div>
-
-            {/* Field 4: Branch */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
-                Branch
-              </label>
-              <div className="bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 flex items-center gap-3 focus-within:border-zinc-600 transition-colors">
-                <MapPin size={16} className="text-zinc-600" />
-                <span className="font-medium truncate">{bankInfo.branch}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Update Button - Full width on mobile, auto width on desktop */}
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={() => setShowAccountDetailModal(true)}
-              className="w-full md:w-auto group flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-white to-zinc-300 text-black font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-            >
-              <Pencil size={18} />
-              Update Account Details
-            </button>
-          </div>
+            </>
+          )}
         </div>
       </div>
       <UpdatePasswordModal

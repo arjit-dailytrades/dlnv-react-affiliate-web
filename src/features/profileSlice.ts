@@ -2,7 +2,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiClient } from "../api/apiClient";
 
-/* ===================== THUNKS ===================== */
 
 export const getProfile = createAsyncThunk(
   "profile/getProfile",
@@ -40,7 +39,6 @@ export const UpdateProfile = createAsyncThunk(
   },
 );
 
-/* ===================== STATE ===================== */
 
 interface ProfileState {
   loading: boolean;
@@ -62,7 +60,6 @@ const initialState: ProfileState = {
   updateError: null,
 };
 
-/* ===================== SLICE ===================== */
 
 const profileSlice = createSlice({
   name: "profile",
@@ -78,7 +75,7 @@ const profileSlice = createSlice({
       /* ===== GET PROFILE ===== */
       .addCase(getProfile.pending, (state) => {
         state.loading = true;
-        state.error = null; // ✅ reset
+        state.error = null; 
       })
       .addCase(getProfile.fulfilled, (state, action) => {
         state.loading = false;
@@ -93,7 +90,7 @@ const profileSlice = createSlice({
       .addCase(UpdateProfile.pending, (state) => {
         state.upLoadingProfile = true;
         state.updateSuccess = false;
-        state.updateError = null; // ✅ reset
+        state.updateError = null; 
       })
       .addCase(UpdateProfile.fulfilled, (state, action) => {
         state.upLoadingProfile = false;
