@@ -44,10 +44,13 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
+  const token = localStorage.getItem("t");
 
   useEffect(() => {
-    dispatch(getProfile());
-  }, []);
+    if (token) {
+      dispatch(getProfile());
+    } else return;
+  }, [token]);
   const router = createBrowserRouter([
     {
       path: "/",
