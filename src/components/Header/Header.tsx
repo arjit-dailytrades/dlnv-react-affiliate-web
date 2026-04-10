@@ -1,7 +1,9 @@
-import { Menu, ChevronDown } from "lucide-react";
+import { Menu, ChevronDown, CircleUserRound, LogOut } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import type { RootState } from "../../app/store";
+import { useEffect, useRef, useState } from "react";
+import { logout } from "../../utils/auth";
 
 type HeaderProps = {
   onMenuClick: () => void;
@@ -19,7 +21,6 @@ const Header = ({ onMenuClick }: HeaderProps) => {
   const formatName = (name: string) => {
     return name.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
   };
-  console.log(user);
 
   const getInitials = (name: string) => {
     if (!name) return "U";
@@ -32,6 +33,19 @@ const Header = ({ onMenuClick }: HeaderProps) => {
 
     return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
   };
+
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header
@@ -65,28 +79,52 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           </div>
 
           {/* Right (Only Profile) */}
-          <button
-            onClick={() => navigate("profile")}
-            className="flex items-center gap-3 rounded-full hover:bg-gray-800 transition border border-transparent hover:border-gray-700"
-          >
-            <div className="relative">
-              {user?.dp ? (
-                <img
-                  src={user.dp}
-                  alt="user"
-                  className="w-9 h-9 rounded-full border border-gray-700 object-cover"
-                />
-              ) : (
-                <div className="w-9 h-9 rounded-full border border-gray-700 bg-zinc-800 flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">
-                    {getInitials(user?.name || "")}
-                  </span>
-                </div>
-              )}
+          <div className="relative" ref={ref}>
+            <button
+              onClick={() => setOpen(!open)}
+              className="flex items-center gap-3 rounded-full hover:bg-gray-800 transition border border-transparent hover:border-gray-700"
+            >
+              <div className="relative">
+                {user?.dp ? (
+                  <img
+                    src={user?.dp}
+                    alt="user"
+                    className="w-9 h-9 rounded-full border border-gray-700 object-cover"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full border border-gray-700 bg-zinc-800 flex items-center justify-center">
+                    <span className="text-white text-sm font-semibold">
+                      {getInitials(user?.name || "")}
+                    </span>
+                  </div>
+                )}
 
-              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-black rounded-full" />
-            </div>
-          </button>
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-black rounded-full" />
+              </div>
+            </button>
+            {/* Dropdown */}
+            {open && (
+              <div className="absolute right-0 mt-2 w-48 bg-[#0B1120] text-white rounded-xl shadow-xl border border-gray-700 z-50">
+                <div className="p-4 border-b border-gray-700">
+                  <p className="font-semibold">{user?.name}</p>
+                  <p className="text-sm text-gray-400">{user?.email}</p>
+                </div>
+
+                <button
+                  onClick={() => navigate("/affiliate/profile")}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-800 flex items-center gap-2"
+                >
+                  <CircleUserRound size={20} /> Profile
+                </button>
+                <button
+                  onClick={() => logout()}
+                  className="w-full text-left px-4 py-2 hover:bg-red-600 rounded-b-xl flex items-center gap-2"
+                >
+                  <LogOut size={20} /> Sign Out
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

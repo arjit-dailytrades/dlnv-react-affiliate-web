@@ -1,5 +1,6 @@
 import React from "react";
 import GoalCard from "../../components/MileStone/GoalCard";
+import MileStone from "../../components/MileStone/MileStone";
 
 const Milestones = () => {
   const weeklyGoals = [
@@ -16,11 +17,12 @@ const Milestones = () => {
 
   return (
     <div className="text-white">
+      <MileStone />
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <GoalCard title="Weekly Goal" goals={weeklyGoals} />
         <GoalCard title="Monthly Goal" goals={monthlyGoals} />
-      </div>
+      </div> */}
     </div>
   );
 };

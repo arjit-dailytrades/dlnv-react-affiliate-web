@@ -19,7 +19,7 @@ const UpdateAccountDetailModal = ({ open, onClose }: Props) => {
     confirmAccountNumber: "",
     ifscCode: "",
     branchName: "",
-    upiId: "",
+    upi: "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +58,7 @@ const UpdateAccountDetailModal = ({ open, onClose }: Props) => {
         if (!value.trim()) message = "Branch name is required";
         break;
 
-      case "upiId":
+      case "upi":
         if (value && !/^[\w.-]+@[\w.-]+$/.test(value)) {
           message = "Invalid UPI ID (e.g. name@bank)";
         }
@@ -86,7 +86,7 @@ const UpdateAccountDetailModal = ({ open, onClose }: Props) => {
       confirmAccountNumber: "",
       ifscCode: "",
       branchName: "",
-      upiId: "",
+      upi: "",
     });
     setErrors({});
     onClose();
@@ -100,7 +100,7 @@ const UpdateAccountDetailModal = ({ open, onClose }: Props) => {
         accountHolderName: accountDetail.accountHolderName,
         ifscCode: accountDetail.ifscCode,
         bankName: accountDetail.branchName,
-        ...(accountDetail.upiId && { upiId: accountDetail.upiId }),
+        ...(accountDetail.upi && { upi: accountDetail.upi }),
       };
 
       const response = await apiClient({
@@ -246,18 +246,18 @@ const UpdateAccountDetailModal = ({ open, onClose }: Props) => {
             </label>
             <input
               type="text"
-              value={accountDetail.upiId}
+              value={accountDetail.upi}
               className={`w-full px-4 py-3 rounded-xl bg-black border ${
-                errors.upiId ? "border-red-500/50" : "border-zinc-800"
+                errors.upi ? "border-red-500/50" : "border-zinc-800"
               } focus:border-zinc-500 outline-none`}
               onChange={(e) => {
                 const value = e.target.value;
-                setAccountDetail((p) => ({ ...p, upiId: value }));
-                validateField("upiId", value);
+                setAccountDetail((p) => ({ ...p, upi: value }));
+                validateField("upi", value);
               }}
             />
             <p className="text-red-400 text-[10px] mt-1 ml-1 min-h-[14px]">
-              {errors.upiId || ""}
+              {errors.upi || ""}
             </p>
           </div>
 
