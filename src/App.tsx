@@ -24,41 +24,38 @@ import { useDispatch } from "react-redux";
 import { getProfile } from "./features/profileSlice";
 import type { AppDispatch } from "./app/store";
 
-// --- AUTH LOGIC HELPERS ---
+const getToken = () => localStorage.getItem("t");
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem("t");
-  if (!token) {
+  if (!getToken()) {
     return <Navigate to={route.LOGIN} replace />;
   }
   return <>{children}</>;
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem("t");
-  if (token) {
-    return <Navigate to={"/affiliate/dashboard"} replace />;
+  if (getToken()) {
+    return <Navigate to="/affiliate/dashboard" replace />;
   }
   return <>{children}</>;
 };
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
-  const token = localStorage.getItem("t");
 
   useEffect(() => {
+    const token = getToken();
     if (token) {
       dispatch(getProfile());
-    } else return;
-  }, [token]);
+    }
+  }, [dispatch]);
+
   const router = createBrowserRouter([
     {
       path: "/",
       element: (
         <Navigate
-          to={
-            localStorage.getItem("token") ? "/affiliate/dashboard" : route.LOGIN
-          }
+          to={getToken() ? "/affiliate/dashboard" : route.LOGIN}
           replace
         />
       ),
@@ -148,18 +145,6 @@ function App() {
             border: "1px solid #27272a",
             borderRadius: "12px",
             padding: "12px 16px",
-          },
-          success: {
-            style: {
-              background: "linear-gradient(to right, #09090b, #18181b)",
-            },
-            iconTheme: { primary: "#22c55e", secondary: "#09090b" },
-          },
-          error: {
-            style: {
-              background: "linear-gradient(to right, #09090b, #18181b)",
-            },
-            iconTheme: { primary: "#ef4444", secondary: "#09090b" },
           },
         }}
       />
