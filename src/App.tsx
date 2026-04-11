@@ -122,10 +122,10 @@ function App() {
           path: route.MILESTONES,
           element: <Milestones />,
         },
-        {
-          path: route.SETTINGS,
-          element: <Settings />,
-        },
+        // {
+        //   path: route.SETTINGS,
+        //   element: <Settings />,
+        // },
       ],
     },
     {

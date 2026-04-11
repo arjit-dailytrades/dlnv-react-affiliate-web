@@ -24,7 +24,7 @@ const ForgotPassword = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
-    if (error) setError(""); // Typing karte waqt error hata dena
+    if (error) setError(""); 
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

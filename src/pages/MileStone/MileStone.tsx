@@ -1,28 +1,48 @@
-import React from "react";
-import GoalCard from "../../components/MileStone/GoalCard";
-import MileStone from "../../components/MileStone/MileStone";
+import React, { useEffect } from "react";
+import { apiClient } from "../../api/apiClient";
+import { showError } from "../../components/common/ToastService";
+import MilestoneJourney from "../../components/MileStone/MileStoneJourney";
+import Loader from "../../components/common/Loader";
 
 const Milestones = () => {
-  const weeklyGoals = [
-    { label: "Equity", completed: 2, total: 5 },
-    { label: "Option", completed: 1, total: 4 },
-    { label: "Future", completed: 0, total: 3 },
-  ];
+  const [milestones, setMilestones] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const monthlyGoals = [
-    { label: "Equity", completed: 10, total: 20 },
-    { label: "Option", completed: 6, total: 15 },
-    { label: "Future", completed: 3, total: 10 },
-  ];
+  const fetchMilestones = async () => {
+    setIsLoading(true);
+    try {
+      const response = await apiClient({
+        method: "get",
+        url: "/affiliate/milestone",
+      });
+      console.log(response,"========response");
+      
+      setMilestones(response);
+
+      setIsLoading(false);
+    } catch (error: any) {
+      showError(error.response?.data?.message || "Failed to fetch milestones");
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchMilestones();
+  }, []);
+
+  console.log("milestones:", milestones);
 
   return (
     <div className="text-white">
-      <MileStone />
-      {/* Grid */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <GoalCard title="Weekly Goal" goals={weeklyGoals} />
-        <GoalCard title="Monthly Goal" goals={monthlyGoals} />
-      </div> */}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <Loader size="md" />
+        </div>
+      ) : (
+        <MilestoneJourney data={milestones} />
+      )}
+      {/* <MileStone /> */}
     </div>
   );
 };

@@ -204,7 +204,7 @@ const Profile = () => {
                 </span>
                 <button
                   onClick={() => handleCopy(user?.referralCode || "")}
-                  className="relative group flex items-center justify-between gap-4 px-5 py-3 rounded-xl bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 hover:border-white/20 transition-all overflow-hidden"
+                  className="cursor-pointer relative group flex items-center justify-between gap-4 px-5 py-3 rounded-xl bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 hover:border-white/20 transition-all overflow-hidden"
                 >
                   {/* Background Glow Effect on Hover */}
                   <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
