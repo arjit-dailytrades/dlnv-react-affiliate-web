@@ -42,7 +42,6 @@ const Milestones = () => {
       ) : (
         <MilestoneJourney data={milestones} />
       )}
-      {/* <MileStone /> */}
     </div>
   );
 };

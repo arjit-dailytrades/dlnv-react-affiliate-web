@@ -2,7 +2,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiClient } from "../api/apiClient";
 
-
 export const getProfile = createAsyncThunk(
   "profile/getProfile",
   async (_, { rejectWithValue }) => {
@@ -39,7 +38,6 @@ export const UpdateProfile = createAsyncThunk(
   },
 );
 
-
 interface ProfileState {
   loading: boolean;
   data: any;
@@ -48,6 +46,8 @@ interface ProfileState {
   upLoadingProfile: boolean;
   updateSuccess: boolean;
   updateError: string | null;
+  isProfileBlocked: boolean;
+  blockedNote?: string;
 }
 
 const initialState: ProfileState = {
@@ -58,8 +58,9 @@ const initialState: ProfileState = {
   upLoadingProfile: false,
   updateSuccess: false,
   updateError: null,
+  isProfileBlocked: false,
+  blockedNote: "",
 };
-
 
 const profileSlice = createSlice({
   name: "profile",
@@ -75,11 +76,13 @@ const profileSlice = createSlice({
       /* ===== GET PROFILE ===== */
       .addCase(getProfile.pending, (state) => {
         state.loading = true;
-        state.error = null; 
+        state.error = null;
       })
       .addCase(getProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
+        state.isProfileBlocked = action.payload?.isBlocked || false;
+        state.blockedNote = action.payload?.blockedNote || "";
       })
       .addCase(getProfile.rejected, (state, action) => {
         state.loading = false;
@@ -90,7 +93,7 @@ const profileSlice = createSlice({
       .addCase(UpdateProfile.pending, (state) => {
         state.upLoadingProfile = true;
         state.updateSuccess = false;
-        state.updateError = null; 
+        state.updateError = null;
       })
       .addCase(UpdateProfile.fulfilled, (state, action) => {
         state.upLoadingProfile = false;

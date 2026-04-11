@@ -20,9 +20,11 @@ import ResetPassword from "./pages/Auth/ResetPassword";
 import NotFound from "./pages/NotFound/NotFound";
 import RecaptchaLoader from "./utils/recaptchaLoader";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getProfile } from "./features/profileSlice";
-import type { AppDispatch } from "./app/store";
+import type { AppDispatch, RootState } from "./app/store";
+import ProfileBlockedModal from "./components/common/ProfileBlockModal";
+import { openProfileBlockedModal } from "./features/uiSlice";
 
 const getToken = () => localStorage.getItem("t");
 
@@ -42,6 +44,19 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
+  const { isProfileBlocked, blockedNote } = useSelector(
+    (state: RootState) => state.profile,
+  );
+  console.log(blockedNote, "============user");
+  const { isProfileBlockedModalOpen } = useSelector(
+    (state: RootState) => state.ui,
+  );
+
+  useEffect(() => {
+    if (isProfileBlocked) {
+      dispatch(openProfileBlockedModal());
+    }
+  }, [isProfileBlocked, dispatch]);
 
   useEffect(() => {
     const token = getToken();
@@ -150,6 +165,10 @@ function App() {
       />
       <RouterProvider router={router} />
       <RecaptchaLoader />
+      <ProfileBlockedModal
+        isOpen={isProfileBlockedModalOpen}
+        reason={blockedNote}
+      />
     </>
   );
 }
