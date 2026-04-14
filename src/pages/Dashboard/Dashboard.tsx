@@ -1,4 +1,8 @@
 import { TrendingUp, IndianRupee, Activity, Users } from "lucide-react";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { getProfile } from "../../features/profileSlice";
+import type { AppDispatch } from "../../app/store";
 
 const stats = [
   {
@@ -45,6 +49,10 @@ const activities = [
 ];
 
 const Dashboard = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  useEffect(() => {
+    dispatch(getProfile());
+  }, []);
 
   return (
     <div className="text-white space-y-6">

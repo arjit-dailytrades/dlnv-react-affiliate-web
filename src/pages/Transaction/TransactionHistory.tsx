@@ -7,6 +7,7 @@ import Pagination from "../../components/common/Pagination";
 import moment from "moment";
 import { Search, X } from "lucide-react";
 import NoData from "../../components/common/NoData";
+import { getProfile } from "../../features/profileSlice";
 
 type Payment = {
   id: string;
@@ -26,6 +27,9 @@ const TransactionHistory = () => {
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  useEffect(() => {
+    dispatch(getProfile());
+  }, []);
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchText);
@@ -116,7 +120,7 @@ const TransactionHistory = () => {
                 <tr>
                   <td colSpan={4}>
                     <div className="min-h-[400px] flex items-center justify-center">
-                    <NoData title="No transaction found" />
+                      <NoData title="No transaction found" />
                     </div>
                   </td>
                 </tr>

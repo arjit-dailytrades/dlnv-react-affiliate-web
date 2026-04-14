@@ -3,8 +3,12 @@ import { apiClient } from "../../api/apiClient";
 import { showError } from "../../components/common/ToastService";
 import MilestoneJourney from "../../components/MileStone/MileStoneJourney";
 import Loader from "../../components/common/Loader";
+import { getProfile } from "../../features/profileSlice";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../app/store";
 
 const Milestones = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const [milestones, setMilestones] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -15,8 +19,8 @@ const Milestones = () => {
         method: "get",
         url: "/affiliate/milestone",
       });
-      console.log(response,"========response");
-      
+      console.log(response, "========response");
+
       setMilestones(response);
 
       setIsLoading(false);
@@ -28,6 +32,7 @@ const Milestones = () => {
     }
   };
   useEffect(() => {
+    dispatch(getProfile());
     fetchMilestones();
   }, []);
 

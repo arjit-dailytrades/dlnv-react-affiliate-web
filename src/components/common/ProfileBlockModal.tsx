@@ -1,5 +1,7 @@
-import { ShieldAlert, Mail, LogOut } from "lucide-react";
+import { ShieldAlert, Phone, LogOutIcon } from "lucide-react";
 import { logout } from "../../utils/auth";
+import { useDispatch } from "react-redux";
+import { closeProfileBlockedModal } from "../../features/uiSlice";
 
 type Props = {
   isOpen: boolean;
@@ -8,6 +10,11 @@ type Props = {
 
 const ProfileBlockedModal = ({ isOpen, reason }: Props) => {
   if (!isOpen) return null;
+  const dispatch = useDispatch();
+  const handleLogout = () => {
+    dispatch(closeProfileBlockedModal());
+    logout();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -34,17 +41,40 @@ const ProfileBlockedModal = ({ isOpen, reason }: Props) => {
         )}
 
         {/* Actions */}
-        <div className="flex flex-col gap-3">
-          {/* Contact Support */}
+
+        <div className="flex flex-col gap-4 w-full">
+          {/* Contact Info Card */}
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col gap-3 text-sm">
+            {/* Email */}
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">Email</span>
+              <a
+                href="mailto:support@dailytrades.in"
+                className="text-white hover:text-red-400 transition"
+              >
+                support@dailytrades.in
+              </a>
+            </div>
+
+            {/* Phone */}
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">Phone</span>
+              <a
+                href="tel:+919220398500"
+                className="text-white hover:text-red-400 transition flex items-center gap-1"
+              >
+                <Phone size={14} />
+                +91-9220398500
+              </a>
+            </div>
+          </div>
           <button
-            onClick={() => {
-              window.location.href = "mailto:support@dailytrades.com";
-            }}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg 
-            bg-red-500/90 hover:bg-red-500 text-white text-sm font-medium transition"
+            onClick={handleLogout}
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl 
+    bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition shadow-sm"
           >
-            <Mail size={16} />
-            Contact Support
+            <LogOutIcon size={18} />
+            Log Out
           </button>
         </div>
       </div>

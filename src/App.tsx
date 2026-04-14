@@ -47,7 +47,6 @@ function App() {
   const { isProfileBlocked, blockedNote } = useSelector(
     (state: RootState) => state.profile,
   );
-  console.log(blockedNote, "============user");
   const { isProfileBlockedModalOpen } = useSelector(
     (state: RootState) => state.ui,
   );
