@@ -104,10 +104,12 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             </button>
             {/* Dropdown */}
             {open && (
-              <div className="absolute right-0 mt-2 w-48 bg-[#0B1120] text-white rounded-xl shadow-xl border border-gray-700 z-50">
+              <div className="absolute right-0 mt-2 w-64 bg-[#0B1120] text-white rounded-xl shadow-xl border border-gray-700 z-50">
                 <div className="p-4 border-b border-gray-700">
                   <p className="font-semibold">{user?.name}</p>
-                  <p className="text-sm text-gray-400">{user?.email}</p>
+                  <p className="text-sm text-gray-400 break-words">
+                    {user?.email}
+                  </p>
                 </div>
 
                 <button
