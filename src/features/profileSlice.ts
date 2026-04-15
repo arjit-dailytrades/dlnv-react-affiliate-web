@@ -48,6 +48,7 @@ interface ProfileState {
   updateError: string | null;
   isProfileBlocked: boolean;
   blockedNote?: string;
+  completeProfileModalOpen?: boolean;
 }
 
 const initialState: ProfileState = {
@@ -60,6 +61,7 @@ const initialState: ProfileState = {
   updateError: null,
   isProfileBlocked: false,
   blockedNote: "",
+  completeProfileModalOpen: false,
 };
 
 const profileSlice = createSlice({
@@ -69,6 +71,10 @@ const profileSlice = createSlice({
     resetProfileState: (state) => {
       state.updateSuccess = false;
       state.updateError = null;
+    },
+
+    closeCompleteProfileModal: (state) => {
+      state.completeProfileModalOpen = false;
     },
   },
   extraReducers: (builder) => {
@@ -83,6 +89,7 @@ const profileSlice = createSlice({
         state.data = action.payload;
         state.isProfileBlocked = action.payload?.isBlocked || false;
         state.blockedNote = action.payload?.blockedNote || "";
+        state.completeProfileModalOpen = !action.payload?.isActive;
       })
       .addCase(getProfile.rejected, (state, action) => {
         state.loading = false;
@@ -113,5 +120,6 @@ const profileSlice = createSlice({
   },
 });
 
-export const { resetProfileState } = profileSlice.actions;
+export const { resetProfileState, closeCompleteProfileModal } =
+  profileSlice.actions;
 export default profileSlice.reducer;

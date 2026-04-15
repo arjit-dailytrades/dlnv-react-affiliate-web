@@ -21,11 +21,13 @@ import UpdateAccountDetailModal from "../../components/Profile/UpdateAccountDeta
 import { showError, showSuccess } from "../../components/common/ToastService";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  closeCompleteProfileModal,
   getProfile,
   resetProfileState,
   UpdateProfile,
 } from "../../features/profileSlice";
 import type { AppDispatch, RootState } from "../../app/store";
+import { useLocation } from "react-router-dom";
 
 const Profile = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -33,6 +35,43 @@ const Profile = () => {
     (state: RootState) => state.profile,
   );
   const [copied, setCopied] = useState(false);
+  const { hash } = useLocation();
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showAccountDetailModal, setShowAccountDetailModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (hash === "#complete-profile") {
+      const closeTimer = setTimeout(() => {
+        dispatch(closeCompleteProfileModal());
+      }, 300);
+
+      const openTimer = setTimeout(() => {
+        const element = document.getElementById("complete-profile");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 600);
+
+      return () => {
+        clearTimeout(closeTimer);
+        clearTimeout(openTimer);
+      };
+    }
+  }, [hash, dispatch]);
+
+  useEffect(() => {
+    if (hash !== "#complete-profile") {
+      dispatch(getProfile());
+    }
+  }, []);
+
+  const handleCloseAccountModal = () => {
+    setShowAccountDetailModal(false);
+    if (window.location.hash === "#complete-profile") {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  };
 
   const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -40,17 +79,6 @@ const Profile = () => {
     showSuccess("Referral code copied!");
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const bankInfo = {
-    holderName: "Arjit Singh",
-    accountNumber: "98765432101234",
-    ifscCode: "HDFC0001234",
-    branch: "Mumbai Main Branch Mumbai Main Branch",
-  };
-
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showAccountDetailModal, setShowAccountDetailModal] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -97,9 +125,6 @@ const Profile = () => {
       return () => clearTimeout(timer);
     }
   }, [updateSuccess, updateError]);
-  useEffect(() => {
-    dispatch(getProfile());
-  }, []);
 
   const getInitials = (name: string) => {
     if (!name) return "U";
@@ -197,44 +222,45 @@ const Profile = () => {
                   <span className="font-medium">{user?.mobile}</span>
                 </div>
               </div>
+              {user?.isActive && (
+                <div className="w-full md:w-auto flex flex-col gap-1.5">
+                  <span className="text-[12px] uppercase tracking-[0.2em] text-zinc-400 font-bold ml-1">
+                    Your Referral Code
+                  </span>
+                  <button
+                    onClick={() => handleCopy(user?.referralCode || "")}
+                    className="cursor-pointer relative group flex items-center justify-between gap-4 px-5 py-3 rounded-xl bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 hover:border-white/20 transition-all overflow-hidden"
+                  >
+                    {/* Background Glow Effect on Hover */}
+                    <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
 
-              <div className="w-full md:w-auto flex flex-col gap-1.5">
-                <span className="text-[12px] uppercase tracking-[0.2em] text-zinc-400 font-bold ml-1">
-                  Your Referral Code
-                </span>
-                <button
-                  onClick={() => handleCopy(user?.referralCode || "")}
-                  className="cursor-pointer relative group flex items-center justify-between gap-4 px-5 py-3 rounded-xl bg-black/50 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 hover:border-white/20 transition-all overflow-hidden"
-                >
-                  {/* Background Glow Effect on Hover */}
-                  <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                  <div className="flex items-center justify-center gap-10">
-                    <Ticket
-                      size={18}
-                      className="text-zinc-500 group-hover:text-white transition-colors"
-                    />
-
-                    <span className="text-lg font-mono font-bold tracking-wider text-white">
-                      {user?.referralCode || "------"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-center ml-2 pl-4 border-l border-zinc-800">
-                    {copied ? (
-                      <Check
-                        size={18}
-                        className="text-green-500 animate-in zoom-in"
-                      />
-                    ) : (
-                      <Copy
+                    <div className="flex items-center justify-center gap-10">
+                      <Ticket
                         size={18}
                         className="text-zinc-500 group-hover:text-white transition-colors"
                       />
-                    )}
-                  </div>
-                </button>
-              </div>
+
+                      <span className="text-lg font-mono font-bold tracking-wider text-white">
+                        {user?.referralCode || "------"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-center ml-2 pl-4 border-l border-zinc-800">
+                      {copied ? (
+                        <Check
+                          size={18}
+                          className="text-green-500 animate-in zoom-in"
+                        />
+                      ) : (
+                        <Copy
+                          size={18}
+                          className="text-zinc-500 group-hover:text-white transition-colors"
+                        />
+                      )}
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -254,7 +280,10 @@ const Profile = () => {
       {/* Bank Details */}
 
       <div className="mx-auto mt-4">
-        <div className="border border-white/5 rounded-[2rem] p-4 md:p-6 backdrop-blur-xl shadow-2xl">
+        <div
+          id="complete-profile"
+          className="border border-white/5 rounded-[2rem] p-4 md:p-6 backdrop-blur-xl shadow-2xl"
+        >
           {!user?.bankDetails ? (
             <div className="flex flex-col items-center justify-center text-center py-12 px-4">
               {/* Icon */}
@@ -385,7 +414,7 @@ const Profile = () => {
       />
       <UpdateAccountDetailModal
         open={showAccountDetailModal}
-        onClose={() => setShowAccountDetailModal(false)}
+        onClose={handleCloseAccountModal}
       />
     </div>
   );

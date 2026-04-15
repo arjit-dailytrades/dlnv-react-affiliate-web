@@ -11,7 +11,6 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import { route } from "./routes/AppRoutes";
 import Profile from "./pages/Profile/Profile";
-import Settings from "./pages/Settings/Settings";
 import TransactionHistory from "./pages/Transaction/TransactionHistory";
 import Milestones from "./pages/MileStone/MileStone";
 import VerifyEmail from "./pages/Auth/VerifyEmail";
@@ -19,12 +18,13 @@ import ForgotPassword from "./pages/Auth/ForgotPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import NotFound from "./pages/NotFound/NotFound";
 import RecaptchaLoader from "./utils/recaptchaLoader";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getProfile } from "./features/profileSlice";
+import { closeCompleteProfileModal, getProfile } from "./features/profileSlice";
 import type { AppDispatch, RootState } from "./app/store";
 import ProfileBlockedModal from "./components/common/ProfileBlockModal";
 import { openProfileBlockedModal } from "./features/uiSlice";
+import CompleteProfileModal from "./components/common/CompleteProfileModal";
 
 const getToken = () => localStorage.getItem("t");
 
@@ -44,12 +44,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
-  const { isProfileBlocked, blockedNote } = useSelector(
-    (state: RootState) => state.profile,
-  );
-  const { isProfileBlockedModalOpen } = useSelector(
-    (state: RootState) => state.ui,
-  );
+  const { isProfileBlocked } = useSelector((state: RootState) => state.profile);
 
   useEffect(() => {
     if (isProfileBlocked) {
@@ -164,10 +159,14 @@ function App() {
       />
       <RouterProvider router={router} />
       <RecaptchaLoader />
-      <ProfileBlockedModal
+      {/* <ProfileBlockedModal
         isOpen={isProfileBlockedModalOpen}
         reason={blockedNote}
       />
+      <CompleteProfileModal
+        isOpen={completeProfileModalOpen ?? false}
+        onClose={() => dispatch(closeCompleteProfileModal())}
+      /> */}
     </>
   );
 }

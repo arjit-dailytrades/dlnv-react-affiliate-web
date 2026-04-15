@@ -24,3 +24,7 @@
 .grecaptcha-badge {
   visibility: hidden;
 }
+
+#complete-profile {
+  scroll-margin-top: 100px; /* Aapke fixed header ki height ke barabar */
+}

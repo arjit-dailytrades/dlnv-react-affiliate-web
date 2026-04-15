@@ -1,13 +1,35 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Header from "../../components/Header/Header";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import ProfileBlockedModal from "../../components/common/ProfileBlockModal";
+import CompleteProfileModal from "../../components/common/CompleteProfileModal";
+import { closeCompleteProfileModal } from "../../features/profileSlice";
+import { openProfileBlockedModal } from "../../features/uiSlice";
+import type { AppDispatch, RootState } from "../../app/store";
+import { useDispatch, useSelector } from "react-redux";
 
 function MainDashboard() {
   const [open, setOpen] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { isProfileBlocked, blockedNote, completeProfileModalOpen } =
+    useSelector((state: RootState) => state.profile);
+
+  const { isProfileBlockedModalOpen } = useSelector(
+    (state: RootState) => state.ui,
+  );
+  
+
+  useEffect(() => {
+    if (isProfileBlocked) {
+      dispatch(openProfileBlockedModal());
+    }
+  }, [isProfileBlocked, dispatch]);
+
   const handleMenuToggle = () => {
     setOpen((prev) => !prev);
   };
+
   return (
     <div className="flex">
       <Sidebar open={open} setOpen={setOpen} />
@@ -25,6 +47,15 @@ function MainDashboard() {
           </div>
         </main>
       </div>
+      <ProfileBlockedModal
+        isOpen={isProfileBlockedModalOpen}
+        reason={blockedNote}
+      />
+
+      <CompleteProfileModal
+        isOpen={completeProfileModalOpen ?? false}
+        onClose={() => dispatch(closeCompleteProfileModal())}
+      />
     </div>
   );
 }
