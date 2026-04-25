@@ -5,7 +5,6 @@ import { getTransactionHistory } from "../../features/transactionSlice";
 import Loader from "../../components/common/Loader";
 import Pagination from "../../components/common/Pagination";
 import moment from "moment";
-import { Search, X } from "lucide-react";
 import NoData from "../../components/common/NoData";
 import { getProfile } from "../../features/profileSlice";
 
@@ -24,24 +23,14 @@ const TransactionHistory = () => {
   );
 
   const [page, setPage] = useState(1);
-  const [searchText, setSearchText] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
     dispatch(getProfile());
   }, []);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchText);
-      setPage(1);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchText]);
 
   useEffect(() => {
-    dispatch(getTransactionHistory({ page, searchText: debouncedSearch }));
-  }, [dispatch, page, debouncedSearch]);
+    dispatch(getTransactionHistory({ page }));
+  }, [dispatch, page]);
 
   const getStatusStyle = (status: Payment["status"]) => {
     switch (status) {
@@ -65,37 +54,6 @@ const TransactionHistory = () => {
   return (
     <div className="text-white">
       <div className=" backdrop-blur-xl shadow-2xl min-h-[500px]">
-        {/* Search Bar */}
-        {/* <div className="mb-6 flex justify-between items-center">
-          <div className="relative w-full md:w-96 group">
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-white transition"
-            />
-
-            <input
-              type="text"
-              placeholder="Search transactions..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="w-full pl-11 pr-10 py-2.5 rounded-xl 
-      bg-zinc-900/70 backdrop-blur-md 
-      border border-zinc-700/50 
-      text-sm text-white placeholder:text-zinc-500
-      focus:outline-none focus:ring-2 focus:ring-white/10 
-      focus:border-zinc-500 transition-all duration-200"
-            />
-
-            {searchText && (
-              <button
-                onClick={() => setSearchText("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-        </div> */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-black/80 border-b border-zinc-800 text-zinc-400">

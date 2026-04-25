@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   MoveRight,
@@ -6,10 +6,8 @@ import {
   X,
   Loader2,
   AlertCircle,
-  ShieldCheck,
   Lock,
 } from "lucide-react";
-import ReCAPTCHA from "react-google-recaptcha";
 import axios from "axios";
 import Logo from "../../assets/appLogo.png";
 import { environment } from "../../environments/environment";
@@ -19,32 +17,31 @@ type FormData = { email: string; password: string };
 type Errors = Partial<FormData>;
 
 const API_BASE = `${environment.apiBase}/affiliate/auth`;
-const V3_SITE_KEY = environment.SITE_KEY_V3;
-const V2_SITE_KEY = environment.SITE_KEY_V2;
+// const V3_SITE_KEY = environment.SITE_KEY_V3;
 
 const Login = () => {
   const navigate = useNavigate();
-  const recaptchaV2Ref = useRef<ReCAPTCHA>(null);
+  // const recaptchaV2Ref = useRef<ReCAPTCHA>(null);
 
   const [form, setForm] = useState<FormData>({ email: "", password: "" });
   const [errors, setErrors] = useState<Errors>({});
   const [loading, setLoading] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
-  const [showV2, setShowV2] = useState(false);
+  // const [showV2, setShowV2] = useState(false);
   const [resending, setResending] = useState(false);
 
-  const getV3Token = (): Promise<string | null> => {
-    return new Promise((resolve) => {
-      const grecaptcha = (window as any).grecaptcha;
-      if (!grecaptcha) return resolve(null);
-      grecaptcha.ready(() => {
-        grecaptcha
-          .execute(V3_SITE_KEY, { action: "login" })
-          .then((token: string) => resolve(token))
-          .catch(() => resolve(null));
-      });
-    });
-  };
+  // const getV3Token = (): Promise<string | null> => {
+  //   return new Promise((resolve) => {
+  //     const grecaptcha = (window as any).grecaptcha;
+  //     if (!grecaptcha) return resolve(null);
+  //     grecaptcha.ready(() => {
+  //       grecaptcha
+  //         .execute(V3_SITE_KEY, { action: "login" })
+  //         .then((token: string) => resolve(token))
+  //         .catch(() => resolve(null));
+  //     });
+  //   });
+  // };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });

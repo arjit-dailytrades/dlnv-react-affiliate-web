@@ -9,9 +9,14 @@ import { getProfile } from "../../features/profileSlice";
 type Props = {
   open: boolean;
   onClose: () => void;
+  setShowSuccessPopup: (e: boolean) => void;
 };
 
-const UpdateAccountDetailModal = ({ open, onClose }: Props) => {
+const UpdateAccountDetailModal = ({
+  open,
+  onClose,
+  setShowSuccessPopup,
+}: Props) => {
   const dispatch = useDispatch<AppDispatch>();
   const [accountDetail, setAccountDetail] = useState({
     accountHolderName: "",
@@ -112,6 +117,7 @@ const UpdateAccountDetailModal = ({ open, onClose }: Props) => {
       showSuccess(response?.data?.message || "Bank details updated");
       handleResetAndClose();
       dispatch(getProfile());
+      setShowSuccessPopup(true);
     } catch (error: any) {
       const message =
         error?.response?.data?.message ||

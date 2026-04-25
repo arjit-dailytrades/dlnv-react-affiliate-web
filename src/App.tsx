@@ -20,11 +20,9 @@ import NotFound from "./pages/NotFound/NotFound";
 import RecaptchaLoader from "./utils/recaptchaLoader";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { closeCompleteProfileModal, getProfile } from "./features/profileSlice";
+import { getProfile } from "./features/profileSlice";
 import type { AppDispatch, RootState } from "./app/store";
-import ProfileBlockedModal from "./components/common/ProfileBlockModal";
 import { openProfileBlockedModal } from "./features/uiSlice";
-import CompleteProfileModal from "./components/common/CompleteProfileModal";
 
 const getToken = () => localStorage.getItem("t");
 
@@ -131,10 +129,6 @@ function App() {
           path: route.MILESTONES,
           element: <Milestones />,
         },
-        // {
-        //   path: route.SETTINGS,
-        //   element: <Settings />,
-        // },
       ],
     },
     {
@@ -159,14 +153,6 @@ function App() {
       />
       <RouterProvider router={router} />
       <RecaptchaLoader />
-      {/* <ProfileBlockedModal
-        isOpen={isProfileBlockedModalOpen}
-        reason={blockedNote}
-      />
-      <CompleteProfileModal
-        isOpen={completeProfileModalOpen ?? false}
-        onClose={() => dispatch(closeCompleteProfileModal())}
-      /> */}
     </>
   );
 }

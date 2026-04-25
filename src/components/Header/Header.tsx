@@ -1,6 +1,6 @@
-import { Menu, ChevronDown, CircleUserRound, LogOut } from "lucide-react";
+import { Menu, CircleUserRound, LogOut } from "lucide-react";
 import { useSelector } from "react-redux";
-import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { RootState } from "../../app/store";
 import { useEffect, useRef, useState } from "react";
 import { logout } from "../../utils/auth";
@@ -10,7 +10,7 @@ type HeaderProps = {
 };
 
 const Header = ({ onMenuClick }: HeaderProps) => {
-  const { data: user, loading } = useSelector(
+  const { data: user } = useSelector(
     (state: RootState) => state.profile,
   );
   const location = useLocation();

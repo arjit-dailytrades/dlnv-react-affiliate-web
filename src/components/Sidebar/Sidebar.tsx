@@ -2,7 +2,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   User,
-  Settings,
   LogOut,
   X,
   ArrowLeftRight,
@@ -16,7 +15,6 @@ const menuItems = [
   { name: "Profile", path: "profile", icon: User },
   { name: "Transaction History", path: "transactions", icon: ArrowLeftRight },
   { name: "Milestones", path: "milestones", icon: Milestone },
-  // { name: "Settings", path: "settings", icon: Settings },
 ];
 
 const Sidebar = ({

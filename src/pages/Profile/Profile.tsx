@@ -28,10 +28,11 @@ import {
 } from "../../features/profileSlice";
 import type { AppDispatch, RootState } from "../../app/store";
 import { useLocation } from "react-router-dom";
+import BankSuccessPopup from "../../components/Profile/SuccessPopup";
 
 const Profile = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { data: user, loading } = useSelector(
+  const { data: user } = useSelector(
     (state: RootState) => state.profile,
   );
   const [copied, setCopied] = useState(false);
@@ -39,6 +40,7 @@ const Profile = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showAccountDetailModal, setShowAccountDetailModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   useEffect(() => {
     if (hash === "#complete-profile") {
@@ -415,6 +417,11 @@ const Profile = () => {
       <UpdateAccountDetailModal
         open={showAccountDetailModal}
         onClose={handleCloseAccountModal}
+        setShowSuccessPopup={setShowSuccessPopup}
+      />
+      <BankSuccessPopup
+        open={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
       />
     </div>
   );

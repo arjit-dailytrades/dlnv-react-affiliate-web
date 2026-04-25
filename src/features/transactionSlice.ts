@@ -31,12 +31,12 @@ export const getTransactionHistory = createAsyncThunk<
   FetchParams
 >(
   "affiliate/getTransactionHistory",
-  async ({ page = 1, searchText = "" }, { rejectWithValue }) => {
+  async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const res = await apiClient({
         method: "get",
         url: "/affiliate/payment-history",
-        params: { page, pageSize: 10, search: searchText },
+        params: { page, pageSize: 10 },
       });
       console.log(res, "==========res");
 

@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, MoveLeft, MoveRight } from "lucide-react";
+import { ArrowLeft, ArrowRight} from "lucide-react";
 import React from "react";
 
 type Props = {

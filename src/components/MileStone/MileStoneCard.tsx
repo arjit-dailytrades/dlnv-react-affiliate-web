@@ -514,7 +514,7 @@ const DailyChallenge: FC<DailyChallengeProps> = ({ label, pct }) => (
 );
 
 // ===== MAIN APP =====
-export default function MilestoneCard({milestones}: {milestones: any[]}) {
+export default function MilestoneCard() {
   const [tab, setTab] = useState<MilestoneType>("registration");
   const [regCount, setRegCount] = useState<number>(0);
   const [subCount, setSubCount] = useState<number>(0);

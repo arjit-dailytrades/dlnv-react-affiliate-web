@@ -92,6 +92,7 @@ const ResetPassword = () => {
           password,
         },
       );
+      console.log(response);
 
       showSuccess("Password reset successful!");
       setIsSuccess(true);

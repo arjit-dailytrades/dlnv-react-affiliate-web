@@ -9,8 +9,6 @@ import {
 import { useState, useEffect, useMemo } from "react";
 
 import { showError, showSuccess } from "../common/ToastService";
-import axios from "axios";
-import { environment } from "../../environments/environment";
 import { apiClient } from "../../api/apiClient";
 
 type Props = {

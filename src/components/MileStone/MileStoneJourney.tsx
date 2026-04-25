@@ -72,18 +72,18 @@ interface MilestoneJourneyProps {
 
 // ===== LABEL & ICON MAPS =====
 const REG_META: Array<{ label: string; icon: string }> = [
-  { label: "Novice",      icon: "🌱" },
-  { label: "Rising",      icon: "⚡" },
-  { label: "Elite",       icon: "🔥" },
-  { label: "Legend",      icon: "👑" },
-  { label: "Mythic",      icon: "🌌" },
+  { label: "Novice", icon: "🌱" },
+  { label: "Rising", icon: "⚡" },
+  { label: "Elite", icon: "🔥" },
+  { label: "Legend", icon: "👑" },
+  { label: "Mythic", icon: "🌌" },
 ];
 
 const SUB_META: Array<{ label: string; icon: string }> = [
-  { label: "Starter",     icon: "💡" },
-  { label: "Grower",      icon: "🌿" },
-  { label: "Champion",    icon: "🏅" },
-  { label: "Master",      icon: "⚔️" },
+  { label: "Starter", icon: "💡" },
+  { label: "Grower", icon: "🌿" },
+  { label: "Champion", icon: "🏅" },
+  { label: "Master", icon: "⚔️" },
   { label: "Grandmaster", icon: "🎯" },
 ];
 
@@ -102,9 +102,9 @@ function transformEntries(
     return {
       individualTarget: entry.target,
       cumulativeTarget: cumulative,
-      reward:           entry.reward,
-      label:            meta[i]?.label ?? `Tier ${i + 1}`,
-      icon:             meta[i]?.icon  ?? "⭐",
+      reward: entry.reward,
+      label: meta[i]?.label ?? `Tier ${i + 1}`,
+      icon: meta[i]?.icon ?? "⭐",
     };
   });
 }
@@ -114,7 +114,7 @@ function transformConfig(
 ): Record<MilestoneType, MilestoneData[]> {
   return {
     registration: transformEntries(config.Registration ?? [], REG_META),
-    subscription:  transformEntries(config.Subscription  ?? [], SUB_META),
+    subscription: transformEntries(config.Subscription ?? [], SUB_META),
   };
 }
 
@@ -122,7 +122,7 @@ function transformConfig(
 const TooltipPortal: FC<{ tooltip: TooltipInfo | null }> = ({ tooltip }) => {
   if (!tooltip) return null;
   const left = tooltip.rect.left + tooltip.rect.width / 2;
-  const top  = tooltip.rect.top - 12;
+  const top = tooltip.rect.top - 12;
   return ReactDOM.createPortal(
     <div
       className="fixed z-[9999] pointer-events-none"
@@ -137,11 +137,15 @@ const TooltipPortal: FC<{ tooltip: TooltipInfo | null }> = ({ tooltip }) => {
           {tooltip.label}
         </div>
         <div className="text-slate-400 text-xs">{tooltip.status}</div>
-        <div className="text-amber-400 text-xs font-semibold mt-1">{tooltip.reward}</div>
+        <div className="text-amber-400 text-xs font-semibold mt-1">
+          {tooltip.reward}
+        </div>
       </div>
       <div className="flex justify-center">
-        <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px]
-          border-r-transparent border-t-[6px] border-t-violet-500/70" />
+        <div
+          className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px]
+          border-r-transparent border-t-[6px] border-t-violet-500/70"
+        />
       </div>
     </div>,
     document.body,
@@ -149,12 +153,18 @@ const TooltipPortal: FC<{ tooltip: TooltipInfo | null }> = ({ tooltip }) => {
 };
 
 // ===== SPARKLE =====
-const Sparkle: FC<{ x: number; y: number; onDone: () => void }> = ({ x, y, onDone }) => {
+const Sparkle: FC<{ x: number; y: number; onDone: () => void }> = ({
+  x,
+  y,
+  onDone,
+}) => {
   const emojis = ["✨", "⭐", "💫", "🌟", "✦"];
-  const emoji = useRef<string>(emojis[Math.floor(Math.random() * emojis.length)]);
-  const tx    = useRef<string>((Math.random() * 200 - 100).toFixed(0));
-  const ty    = useRef<string>((Math.random() * 200 - 100).toFixed(0));
-  const size  = useRef<string>((Math.random() * 16 + 10).toFixed(0));
+  const emoji = useRef<string>(
+    emojis[Math.floor(Math.random() * emojis.length)],
+  );
+  const tx = useRef<string>((Math.random() * 200 - 100).toFixed(0));
+  const ty = useRef<string>((Math.random() * 200 - 100).toFixed(0));
+  const size = useRef<string>((Math.random() * 16 + 10).toFixed(0));
 
   useEffect(() => {
     const t = setTimeout(onDone, 1200);
@@ -166,7 +176,8 @@ const Sparkle: FC<{ x: number; y: number; onDone: () => void }> = ({ x, y, onDon
       className="fixed pointer-events-none z-50"
       style={
         {
-          left: x, top: y,
+          left: x,
+          top: y,
           fontSize: `${size.current}px`,
           "--tx": `${tx.current}px`,
           "--ty": `${ty.current}px`,
@@ -192,24 +203,35 @@ const Toast: FC<{ toast: ToastState }> = ({ toast }) => (
 );
 
 // ===== UNLOCK OVERLAY =====
-const UnlockOverlay: FC<{ data: UnlockData | null; onClose: () => void }> = ({ data, onClose }) => {
+const UnlockOverlay: FC<{ data: UnlockData | null; onClose: () => void }> = ({
+  data,
+  onClose,
+}) => {
   if (!data) return null;
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/70"
+      onClick={onClose}
+    >
       <div
         className="relative bg-slate-900 border-2 border-amber-400 rounded-2xl p-10
           text-center max-w-sm w-11/12 shadow-[0_0_60px_rgba(251,191,36,0.25)]"
         style={{ animation: "mj_popIn 0.5s cubic-bezier(0.34,1.56,0.64,1)" }}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
-        <div className="text-6xl mb-4" style={{ animation: "mj_bounceIn 0.6s ease-out" }}>
+        <div
+          className="text-6xl mb-4"
+          style={{ animation: "mj_bounceIn 0.6s ease-out" }}
+        >
           {data.icon}
         </div>
         <h2 className="font-bold text-amber-400 text-xl tracking-wide uppercase mb-2">
           Milestone Unlocked!
         </h2>
         <div className="text-3xl font-black text-amber-300 my-4 drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">
-          {data.reward != null ? `+${data.reward.toLocaleString()}` : "🎁 Mystery Reward"}
+          {data.reward != null
+            ? `+${data.reward.toLocaleString()}`
+            : "🎁 Mystery Reward"}
         </div>
         <div className="text-slate-400 text-sm mb-6">{data.subtitle}</div>
         <button
@@ -227,13 +249,32 @@ const UnlockOverlay: FC<{ data: UnlockData | null; onClose: () => void }> = ({ d
 
 // ===== PROGRESS RING =====
 const ProgressRing: FC<{ pct: number }> = ({ pct }) => {
-  const r = 36, circ = 2 * Math.PI * r;
+  const r = 36,
+    circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
   return (
-    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 80 80">
-      <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="3" />
-      <circle cx="40" cy="40" r={r} fill="none" stroke="#a855f7" strokeWidth="3"
-        strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset}
+    <svg
+      className="absolute inset-0 w-full h-full -rotate-90"
+      viewBox="0 0 80 80"
+    >
+      <circle
+        cx="40"
+        cy="40"
+        r={r}
+        fill="none"
+        stroke="rgba(139,92,246,0.15)"
+        strokeWidth="3"
+      />
+      <circle
+        cx="40"
+        cy="40"
+        r={r}
+        fill="none"
+        stroke="#a855f7"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeDasharray={circ}
+        strokeDashoffset={offset}
         className="drop-shadow-[0_0_4px_#a855f7] transition-all duration-700"
       />
     </svg>
@@ -255,23 +296,32 @@ interface MilestoneNodeProps {
 }
 
 const MilestoneNode: FC<MilestoneNodeProps> = ({
-  ms, index, totalCount, claimed, onClaim, isLast, allMilestones,
-  onTooltipShow, onTooltipHide,
+  ms,
+  index,
+  totalCount,
+  claimed,
+  onClaim,
+  isLast,
+  allMilestones,
+  onTooltipShow,
+  onTooltipHide,
 }) => {
   const circleRef = useRef<HTMLDivElement>(null);
 
   // ── CUMULATIVE LOGIC ──────────────────────────────────────────────────────
   // ms.cumulativeTarget = total registrations/subscriptions needed to FINISH this milestone
   // previous milestone's cumulativeTarget = where THIS milestone starts from
-  const prevCumulative = index > 0 ? allMilestones[index - 1].cumulativeTarget : 0;
+  const prevCumulative =
+    index > 0 ? allMilestones[index - 1].cumulativeTarget : 0;
 
   // Is this milestone fully done? (total count has reached or passed cumulative target)
-  const isCompleted = totalCount >= ms.cumulativeTarget && claimed.includes(index);
+  const isCompleted =
+    totalCount >= ms.cumulativeTarget && claimed.includes(index);
 
   // Previous milestone must be claimed before this one is "active"
   const prevClaimed = index === 0 || claimed.includes(index - 1);
-  const isCurrent   = !isCompleted && prevClaimed;
-  const isLocked    = !isCurrent && !isCompleted;
+  const isCurrent = !isCompleted && prevClaimed;
+  const isLocked = !isCurrent && !isCompleted;
 
   // Progress within THIS milestone only:
   // e.g. Milestone 2 needs 500 more (from 100 → 600).
@@ -279,19 +329,25 @@ const MilestoneNode: FC<MilestoneNodeProps> = ({
   const countIntoThisMilestone = Math.max(0, totalCount - prevCumulative);
   const progressPct = isCurrent
     ? Math.min((countIntoThisMilestone / ms.individualTarget) * 100, 100)
-    : isCompleted ? 100 : 0;
+    : isCompleted
+      ? 100
+      : 0;
 
   const lineWidth = isCompleted ? 100 : isCurrent ? progressPct : 0;
-  const canClaim  = totalCount >= ms.cumulativeTarget && !claimed.includes(index) && prevClaimed;
+  const canClaim =
+    totalCount >= ms.cumulativeTarget &&
+    !claimed.includes(index) &&
+    prevClaimed;
   // ─────────────────────────────────────────────────────────────────────────
 
   let nodeClass = "";
   if (isCompleted)
-    nodeClass = "border-emerald-400 bg-emerald-500/10 shadow-[0_0_24px_rgba(52,211,153,0.3)]";
+    nodeClass =
+      "border-emerald-400 bg-emerald-500/10 shadow-[0_0_24px_rgba(52,211,153,0.3)]";
   else if (isCurrent)
-    nodeClass = "border-violet-500 bg-violet-500/15 shadow-[0_0_30px_rgba(139,92,246,0.4)]";
-  else
-    nodeClass = "border-slate-600/40 bg-slate-800/30 opacity-60";
+    nodeClass =
+      "border-violet-500 bg-violet-500/15 shadow-[0_0_30px_rgba(139,92,246,0.4)]";
+  else nodeClass = "border-slate-600/40 bg-slate-800/30 opacity-60";
 
   const handleMouseEnter = () => {
     const el = circleRef.current;
@@ -310,7 +366,7 @@ const MilestoneNode: FC<MilestoneNodeProps> = ({
     }
 
     onTooltipShow({
-      label:  `${ms.label} Milestone`,
+      label: `${ms.label} Milestone`,
       status,
       reward: ms.reward != null ? `💰 ${ms.reward.toLocaleString()}` : "🎁 ???",
       rect,
@@ -332,8 +388,10 @@ const MilestoneNode: FC<MilestoneNodeProps> = ({
           >
             {isCurrent && progressPct > 0 && <ProgressRing pct={progressPct} />}
             {isCurrent && (
-              <div className="absolute inset-0 rounded-full border-[3px] border-violet-500/30 animate-spin"
-                style={{ animationDuration: "3s" }} />
+              <div
+                className="absolute inset-0 rounded-full border-[3px] border-violet-500/30 animate-spin"
+                style={{ animationDuration: "3s" }}
+              />
             )}
             {isCompleted && (
               <div className="absolute inset-0 rounded-full border-[3px] border-emerald-400/30 animate-ping" />
@@ -344,8 +402,10 @@ const MilestoneNode: FC<MilestoneNodeProps> = ({
           </div>
 
           {canClaim && (
-            <div className="absolute -top-2 -right-2 w-5 h-5 bg-amber-400 rounded-full
-              animate-bounce flex items-center justify-center text-xs font-bold text-slate-900">
+            <div
+              className="absolute -top-2 -right-2 w-5 h-5 bg-amber-400 rounded-full
+              animate-bounce flex items-center justify-center text-xs font-bold text-slate-900"
+            >
               !
             </div>
           )}
@@ -354,18 +414,27 @@ const MilestoneNode: FC<MilestoneNodeProps> = ({
         {/* Info below node */}
         <div className="mt-3 text-center">
           {/* Show the INDIVIDUAL target (e.g. "500") not the cumulative */}
-          <div className={`text-sm font-bold ${
-            isCompleted ? "text-emerald-400" : isCurrent ? "text-violet-300" : "text-slate-500"
-          }`}>
+          <div
+            className={`text-sm font-bold ${
+              isCompleted
+                ? "text-emerald-400"
+                : isCurrent
+                  ? "text-violet-300"
+                  : "text-slate-500"
+            }`}
+          >
             +{ms.individualTarget.toLocaleString()}
           </div>
           {/* Show progress count within this milestone when active */}
           {isCurrent && (
             <div className="text-[10px] text-violet-400 mt-0.5">
-              {countIntoThisMilestone.toLocaleString()} / {ms.individualTarget.toLocaleString()}
+              {countIntoThisMilestone.toLocaleString()} /{" "}
+              {ms.individualTarget.toLocaleString()}
             </div>
           )}
-          <div className={`text-xs mt-0.5 ${isCompleted ? "text-amber-400" : "text-slate-500"}`}>
+          <div
+            className={`text-xs mt-0.5 ${isCompleted ? "text-amber-400" : "text-slate-500"}`}
+          >
             {ms.reward != null ? `💰 ${ms.reward.toLocaleString()}` : "🎁 ???"}
           </div>
           <div className="text-[10px] uppercase tracking-widest text-slate-600 mt-1">
@@ -413,9 +482,18 @@ interface JourneyProps {
 }
 
 const Journey: FC<JourneyProps> = ({
-  type, totalCount, claimed, onClaim, milestones, onTooltipShow, onTooltipHide,
+  type,
+  totalCount,
+  claimed,
+  onClaim,
+  milestones,
+  onTooltipShow,
+  onTooltipHide,
 }) => {
-  const data: MilestoneDataWithType[] = milestones[type].map((m) => ({ ...m, _type: type }));
+  const data: MilestoneDataWithType[] = milestones[type].map((m) => ({
+    ...m,
+    _type: type,
+  }));
   return (
     <div className="overflow-x-auto pb-4">
       <div className="flex items-center justify-center min-w-max gap-0 px-6 py-10">
@@ -441,7 +519,7 @@ const Journey: FC<JourneyProps> = ({
 // ===== XP BAR =====
 const XPBar: FC<{ xp: number }> = ({ xp }) => {
   const maxXP = 500000;
-  const pct   = Math.min((xp / maxXP) * 100, 100);
+  const pct = Math.min((xp / maxXP) * 100, 100);
   const level = Math.floor(xp / 10000) + 1;
   return (
     <div className="text-center my-4">
@@ -451,8 +529,10 @@ const XPBar: FC<{ xp: number }> = ({ xp }) => {
             to-cyan-400 relative overflow-hidden transition-all duration-700"
           style={{ width: `${pct}%`, minWidth: pct > 0 ? "12px" : "0" }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            style={{ animation: "mj_shimmer 2s linear infinite" }} />
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            style={{ animation: "mj_shimmer 2s linear infinite" }}
+          />
         </div>
       </div>
       <div className="text-sm text-violet-300 mt-2 tracking-wide">
@@ -470,8 +550,10 @@ const DailyChallenge: FC<{ label: string; pct: number }> = ({ label, pct }) => (
     </h4>
     <p className="text-slate-500 text-sm mb-3">{label}</p>
     <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-      <div className="h-full bg-gradient-to-r from-amber-500 to-orange-400 rounded-full transition-all duration-500"
-        style={{ width: `${pct}%` }} />
+      <div
+        className="h-full bg-gradient-to-r from-amber-500 to-orange-400 rounded-full transition-all duration-500"
+        style={{ width: `${pct}%` }}
+      />
     </div>
   </div>
 );
@@ -490,20 +572,31 @@ const LoadingSkeleton: FC = () => (
 );
 
 // ===== STATS BANNER =====
-const StatsBanner: FC<{ regCount: number; subCount: number }> = ({ regCount, subCount }) => (
+const StatsBanner: FC<{ regCount: number; subCount: number }> = ({
+  regCount,
+  subCount,
+}) => (
   <div className="flex justify-center gap-4 px-6 mb-4">
     <div className="flex items-center gap-2 bg-slate-800/50 border border-violet-500/20 rounded-xl px-5 py-3">
       <span className="text-lg">📋</span>
       <div>
-        <div className="text-xs text-slate-500 uppercase tracking-wider">Total Registrations</div>
-        <div className="text-lg font-bold text-violet-300">{regCount.toLocaleString()}</div>
+        <div className="text-xs text-slate-500 uppercase tracking-wider">
+          Total Registrations
+        </div>
+        <div className="text-lg font-bold text-violet-300">
+          {regCount.toLocaleString()}
+        </div>
       </div>
     </div>
     <div className="flex items-center gap-2 bg-slate-800/50 border border-cyan-500/20 rounded-xl px-5 py-3">
       <span className="text-lg">💎</span>
       <div>
-        <div className="text-xs text-slate-500 uppercase tracking-wider">Total Subscriptions</div>
-        <div className="text-lg font-bold text-cyan-300">{subCount.toLocaleString()}</div>
+        <div className="text-xs text-slate-500 uppercase tracking-wider">
+          Total Subscriptions
+        </div>
+        <div className="text-lg font-bold text-cyan-300">
+          {subCount.toLocaleString()}
+        </div>
       </div>
     </div>
   </div>
@@ -511,23 +604,27 @@ const StatsBanner: FC<{ regCount: number; subCount: number }> = ({ regCount, sub
 
 // ===== MAIN COMPONENT =====
 export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
-  const config   = data?.affiliateMileStone ?? null;
-  const regCount = data?.registrationCount  ?? 0;
-  const subCount = data?.subscriptionCount  ?? 0;
+  const config = data?.affiliateMileStone ?? null;
+  const regCount = data?.registrationCount ?? 0;
+  const subCount = data?.subscriptionCount ?? 0;
 
   const milestones = React.useMemo(
     () => (config ? transformConfig(config) : null),
     [config],
   );
 
-  const [tab,        setTab]        = useState<MilestoneType>("registration");
+  const [tab, setTab] = useState<MilestoneType>("registration");
   const [claimedReg, setClaimedReg] = useState<number[]>([]);
   const [claimedSub, setClaimedSub] = useState<number[]>([]);
-  const [totalXP,    setTotalXP]    = useState<number>(0);
+  const [totalXP, setTotalXP] = useState<number>(0);
   const [unlockData, setUnlockData] = useState<UnlockData | null>(null);
-  const [sparkles,   setSparkles]   = useState<SparkleItem[]>([]);
-  const [toast,      setToast]      = useState<ToastState>({ show: false, title: "", msg: "" });
-  const [tooltip,    setTooltip]    = useState<TooltipInfo | null>(null);
+  const [sparkles, setSparkles] = useState<SparkleItem[]>([]);
+  const [toast, setToast] = useState<ToastState>({
+    show: false,
+    title: "",
+    msg: "",
+  });
+  const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
 
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -549,10 +646,12 @@ export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
     setClaimedSub(autoSub);
 
     const xpFromReg = autoReg.reduce(
-      (sum, i) => sum + (milestones.registration[i]?.reward ?? 0), 0,
+      (sum, i) => sum + (milestones.registration[i]?.reward ?? 0),
+      0,
     );
     const xpFromSub = autoSub.reduce(
-      (sum, i) => sum + (milestones.subscription[i]?.reward ?? 0), 0,
+      (sum, i) => sum + (milestones.subscription[i]?.reward ?? 0),
+      0,
     );
     setTotalXP(xpFromReg + xpFromSub);
   }, [milestones, regCount, subCount]);
@@ -560,18 +659,24 @@ export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
   const showToast = useCallback((title: string, msg: string) => {
     setToast({ show: true, title, msg });
     if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, show: false })), 3000);
+    toastTimer.current = setTimeout(
+      () => setToast((t) => ({ ...t, show: false })),
+      3000,
+    );
   }, []);
 
   const spawnSparkles = useCallback(() => {
     const items: SparkleItem[] = Array.from({ length: 20 }, (_, i) => ({
       id: Date.now() + i,
-      x:  Math.random() * window.innerWidth,
-      y:  Math.random() * window.innerHeight,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
     }));
     setSparkles((s) => [...s, ...items]);
     setTimeout(
-      () => setSparkles((s) => s.filter((sp) => !items.find((it) => it.id === sp.id))),
+      () =>
+        setSparkles((s) =>
+          s.filter((sp) => !items.find((it) => it.id === sp.id)),
+        ),
       1500,
     );
   }, []);
@@ -579,17 +684,17 @@ export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
   const handleClaim = useCallback(
     (type: MilestoneType, index: number) => {
       if (!milestones) return;
-      const ms      = milestones[type][index];
+      const ms = milestones[type][index];
       const claimed = type === "registration" ? claimedReg : claimedSub;
       if (claimed.includes(index)) return;
 
       setTotalXP((x) => x + (ms.reward ?? 0));
       if (type === "registration") setClaimedReg((c) => [...c, index]);
-      else                          setClaimedSub((c) => [...c, index]);
+      else setClaimedSub((c) => [...c, index]);
 
       setUnlockData({
-        icon:     ms.icon,
-        reward:   ms.reward,
+        icon: ms.icon,
+        reward: ms.reward,
         subtitle: `${type === "registration" ? "📋 Registration" : "💎 Subscription"} — ${ms.label} Milestone`,
       });
       spawnSparkles();
@@ -606,7 +711,7 @@ export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
 
   const tabs: Array<{ id: MilestoneType; label: string; icon: string }> = [
     { id: "registration", label: "Registration", icon: "📋" },
-    { id: "subscription",  label: "Subscription",  icon: "💎" },
+    { id: "subscription", label: "Subscription", icon: "💎" },
   ];
 
   return (
@@ -645,8 +750,10 @@ export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
           <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-violet-900/20 blur-3xl" />
           <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-cyan-900/15 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-            w-64 h-64 rounded-full bg-fuchsia-900/10 blur-3xl" />
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+            w-64 h-64 rounded-full bg-fuchsia-900/10 blur-3xl"
+          />
         </div>
 
         <div className="relative z-10 flex flex-col flex-1">
@@ -675,12 +782,14 @@ export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
                 onClick={() => setTab(id)}
                 className={`px-6 py-3 rounded-xl border text-sm font-semibold uppercase
                   tracking-widest transition-all duration-300
-                  ${tab === id
-                    ? "border-violet-500 text-violet-300 bg-violet-500/10 shadow-[0_0_20px_rgba(139,92,246,0.2)]"
-                    : "border-slate-700/50 text-slate-500 hover:border-violet-500/40 hover:text-slate-400 bg-slate-900/30"
+                  ${
+                    tab === id
+                      ? "border-violet-500 text-violet-300 bg-violet-500/10 shadow-[0_0_20px_rgba(139,92,246,0.2)]"
+                      : "border-slate-700/50 text-slate-500 hover:border-violet-500/40 hover:text-slate-400 bg-slate-900/30"
                   }`}
               >
-                <span className="mr-2">{icon}</span>{label}
+                <span className="mr-2">{icon}</span>
+                {label}
               </button>
             ))}
           </div>
@@ -707,7 +816,10 @@ export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
                 />
                 <DailyChallenge
                   label="Complete 3 milestones today for bonus XP!"
-                  pct={Math.min((regCompleted / milestones.registration.length) * 100, 100)}
+                  pct={Math.min(
+                    (regCompleted / milestones.registration.length) * 100,
+                    100,
+                  )}
                 />
               </div>
             )}
@@ -731,13 +843,18 @@ export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
                 />
                 <DailyChallenge
                   label="Complete 2 milestones today for bonus gems!"
-                  pct={Math.min((subCompleted / milestones.subscription.length) * 100, 100)}
+                  pct={Math.min(
+                    (subCompleted / milestones.subscription.length) * 100,
+                    100,
+                  )}
                 />
               </div>
             )}
 
-            <div className="text-center py-4 mb-4 border border-dashed border-slate-800
-              rounded-xl text-slate-600 text-sm max-w-md mx-auto">
+            <div
+              className="text-center py-4 mb-4 border border-dashed border-slate-800
+              rounded-xl text-slate-600 text-sm max-w-md mx-auto"
+            >
               <span className="text-2xl block mb-1">🏆</span>
               Leaderboard integration coming soon — stay tuned!
             </div>
@@ -746,8 +863,12 @@ export default function MilestoneJourney({ data }: MilestoneJourneyProps) {
       </div>
 
       {sparkles.map((s) => (
-        <Sparkle key={s.id} x={s.x} y={s.y}
-          onDone={() => setSparkles((sp) => sp.filter((x) => x.id !== s.id))} />
+        <Sparkle
+          key={s.id}
+          x={s.x}
+          y={s.y}
+          onDone={() => setSparkles((sp) => sp.filter((x) => x.id !== s.id))}
+        />
       ))}
 
       <Toast toast={toast} />

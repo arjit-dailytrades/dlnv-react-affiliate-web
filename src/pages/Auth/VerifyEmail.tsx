@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   MoveRight,
@@ -32,7 +32,7 @@ const VerifyEmail = () => {
   const hasCalled = useRef(false);
 
   const validateInitialToken = useCallback(async () => {
-    if (hasCalled.current) return; // रोक देगा second call
+    if (hasCalled.current) return; 
     hasCalled.current = true;
 
     const urlToken = searchParams.get("affv_t");
